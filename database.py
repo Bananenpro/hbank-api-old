@@ -232,6 +232,8 @@ def execute_scheduled_payment(schedule_id):
     try:
         sp = ScheduledPayment[schedule_id]
 
+        sp.days += 1
+
         if sp.days >= sp.schedule:
             try:
                 sender = User[sp.sender_name]
@@ -246,7 +248,6 @@ def execute_scheduled_payment(schedule_id):
                 sp.delete()
                 return False
         else:
-            sp.days += 1
             return True
     except ObjectNotFound:
         return False
