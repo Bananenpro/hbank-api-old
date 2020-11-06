@@ -1,5 +1,6 @@
 import os
-import datetime
+import uuid
+from datetime import datetime, timedelta
 import hashlib
 
 from pony.orm import *
@@ -24,47 +25,53 @@ def create_user(name, password, is_parent):
 
 @db_session
 def login_user(name, password):
-    user = User[name]
-    if user is None:
-        return None
-    password_db = user.password_hash
-    salt = password_db[:32]
-    password_hash_db = password_db[32:]
-    key = generate_hash(password.encode("utf-8"), salt)
-    if key == password_hash_db:
-        token_salt = os.urandom(32)
-        user.auth_token = str(token_salt + generate_hash(os.urandom(64), token_salt))
-        user.token_expiration_date = datetime.now() + datetime.timedelta(days=1)
-        return user.auth_token
-    else:
+    try:
+        user = User[name]
+        if user is None:
+            return None
+        password_db = user.password_hash
+        salt = password_db[:32]
+        password_hash_db = password_db[32:]
+        key = generate_hash(password.encode("utf-8"), salt)
+        if key == password_hash_db:
+            user.auth_token = str(uuid.uuid4())
+            user.token_expiration_date = datetime.now() + timedelta(days=1)
+            return user.auth_token
+        else:
+            return None
+    except ObjectNotFound:
         return None
 
 
 @db_session
 def logout_user(username):
-    user = User[username]
-    if user is not None:
-        user.auth_token = None
+    try:
+        user = User[username]
+        user.auth_token = ""
         user.token_expiration_date = None
+    except ObjectNotFound:
+        return
 
 
 @db_session
 def verify_auth_token(username, token):
     if token[:7] != "Bearer ":
         return False
-    user = User[username]
-    if user is None or user.auth_token is None or user.token_expiration_date is None:
+    try:
+        user = User[username]
+        if user.auth_token is None or user.token_expiration_date is None:
+            return False
+        if user.token_expiration_date < datetime.now():
+            user.auth_token = ""
+            user.token_expiration_date = None
+            return False
+        token_db = user.auth_token
+        key_db = token_db
+        key = token[7:]
+        if key == key_db:
+            return True
+    except ObjectNotFound:
         return False
-    if user.token_expiration_date < datetime.now():
-        user.auth_token = None
-        user.token_expiration_date = None
-        return False
-    token_db = user.auth_token
-    salt = token_db[:32]
-    key_db = token_db[32:]
-    key = str(generate_hash(token[7:], salt))
-    if key == key_db:
-        return True
     return False
 
 
@@ -76,7 +83,7 @@ def get_user_by_auth_token(token):
     if user is None or user.auth_token is None or user.token_expiration_date is None:
         return None
     if user.token_expiration_date < datetime.now():
-        user.auth_token = None
+        user.auth_token = ""
         user.token_expiration_date = None
         return None
     return user
@@ -97,68 +104,76 @@ def get_users():
 
 @db_session
 def get_user(name):
-    u = User[name]
-    if u is None:
+    try:
+        u = User[name]
+        return UserDto(u.name, u.profile_picture, u.balance, u.is_parent)
+    except ObjectNotFound:
         return None
-    return UserDto(u.name, u.profile_picture, u.balance, u.is_parent)
 
 
 @db_session
 def change_profile_picture_path(username, new_profile_picture_path):
-    user = User[username]
-
-    if user is None:
-        return False
-
-    if user.profile_picture is not None:
-        os.remove(user.profile_picture)
-
-    user.profile_picture = new_profile_picture_path
-
-
-@db_session
-def delete_user(name):
-    user = User[name]
-    if user is not None:
-
-        log = select(entry for entry in Log if entry.sender_name == name or entry.receiver_name == name)
-        for entry in log:
-            if entry.sender_name == name:
-                if entry.receiver_name == name or User[entry.receiver_name] is None:
-                    entry.delete()
-            else:
-                if User[entry.sender_name] is None:
-                    entry.delete()
-
-        scheduled_payments = select(sp for sp in ScheduledPayment if sp.sender_name == name or sp.receiver_name == name)
-        delete(scheduled_payments)
+    try:
+        user = User[username]
 
         if user.profile_picture is not None:
             os.remove(user.profile_picture)
 
-        user.delete()
+        user.profile_picture = new_profile_picture_path
+    except ObjectNotFound:
+        return
 
 
 @db_session
-def transfer_money(sender_name, receiver_name, amount, description):
-    sender = User[sender_name]
-    receiver = User[receiver_name]
-    if sender is None or receiver is None:
+def delete_user(name):
+    try:
+        user = User[name]
+        log = select(entry for entry in Log if entry.sender_name == name or entry.receiver_name == name)
+
+        for entry in log:
+            if entry.sender_name == name:
+                if entry.receiver_name == name or User.get(name=entry.receiver_name) is None:
+                    entry.delete()
+            else:
+                if User.get(name=entry.sender_name) is None:
+                    entry.delete()
+
+        delete(sp for sp in ScheduledPayment if sp.sender_name == name or sp.receiver_name == name)
+
+        if user.profile_picture is not None and os.path.isfile(user.profile_picture):
+            os.remove(user.profile_picture)
+
+        user.delete()
+    except ObjectNotFound:
+        return
+
+
+@db_session
+def transfer_money(sender_name, receiver_name, amount_str, description):
+
+    amount = Decimal(amount_str.replace(",", "."))
+
+    try:
+        sender = User[sender_name]
+        receiver = User[receiver_name]
+
+        if sender.balance > amount:
+            sender.balance -= amount
+            receiver.balance += amount
+            create_log_entry(sender.name, receiver.name, amount, sender.balance, receiver.balance, datetime.now(), description)
+            return True
+    except ObjectNotFound:
         return False
-    if sender.balance > amount:
-        sender.balance -= amount
-        receiver.balance += amount
-        create_log_entry(sender.name, receiver.name, amount, sender.balance, receiver.balance, datetime.now(), description)
-        return True
     return False
 
 
 @db_session
 def change_profile_picture(username, profile_picture):
-    user = User[username]
-    if user is None:
-        return False
-    user.profile_picture = profile_picture
+    try:
+        user = User[username]
+        user.profile_picture = profile_picture
+    except ObjectNotFound:
+        return
 
 
 # Scheduled Payment
@@ -183,46 +198,57 @@ def get_scheduled_payments(username):
 
 
 @db_session
-def create_scheduled_payment(sender_name, receiver_name, amount, schedule, description):
-    if User[sender_name] is None or User[receiver_name] is None:
+def create_scheduled_payment(sender_name, receiver_name, amount_str, schedule, description):
+    try:
+        sender = User[sender_name]
+        receiver = User[receiver_name]
+    except ObjectNotFound:
         return False
+    amount = Decimal(amount_str.replace(",", "."))
     ScheduledPayment(sender_name=sender_name, receiver_name=receiver_name, days=0, schedule=schedule, amount=amount, desc=description)
     return True
 
 
 @db_session
 def get_scheduled_payment(schedule_id):
-    payment = ScheduledPayment[schedule_id]
-    if payment is None:
-        return None
-    return ScheduledPaymentDto(schedule_id, payment.sender_name, payment.receiver_name, payment.days, payment.schedule, payment.amount, payment.desc)
+    try:
+        payment = ScheduledPayment[schedule_id]
+        return ScheduledPaymentDto(schedule_id, payment.sender_name, payment.receiver_name, payment.days, payment.schedule, payment.amount, payment.desc)
+    except ObjectNotFound:
+        return
 
 
 @db_session
 def delete_scheduled_payment(schedule_id):
-    schedule = ScheduledPayment[schedule_id]
-    if schedule is not None:
+    try:
+        schedule = ScheduledPayment[schedule_id]
         schedule.delete()
+    except ObjectNotFound:
+        return
 
 
 @db_session
 def execute_scheduled_payment(schedule_id):
-    sp = ScheduledPayment[schedule_id]
-    if sp is None:
+    try:
+        sp = ScheduledPayment[schedule_id]
+
+        if sp.days >= sp.schedule:
+            try:
+                sender = User[sp.sender_name]
+                receiver = User[sp.receiver_name]
+                if sender.balance > sp.amount:
+                    sender.balance -= sp.amount
+                    receiver.balance += sp.amount
+                    create_log_entry(sender.name, receiver.name, sp.amount, sender.balance, receiver.balance, datetime.now(), sp.desc)
+                sp.days -= sp.schedule
+                return True
+            except ObjectNotFound:
+                sp.delete()
+                return False
+        else:
+            return True
+    except ObjectNotFound:
         return False
-    if sp.days >= sp.schedule:
-        sender = User[sp.sender_name]
-        receiver = User[sp.receiver_name]
-        if sender is None or receiver is None:
-            sp.delete()
-            return False
-        if sender.balance > sp.amount:
-            sender.balance -= sp.amount
-            receiver.balance += sp.amount
-            create_log_entry(sender.name, receiver.name, sp.amount, sender.balance, receiver.balance, datetime.now(), sp.desc)
-        sp.days -= sp.schedule
-        return True
-    return False
 
 
 # Log

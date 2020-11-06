@@ -5,4 +5,4 @@ if __name__ == "__main__":
 
     for payment in payments:
         if not database.execute_scheduled_payment(payment.id):
-            print("Cannot execute scheduled payment '" + payment.id + "'!")
+            print("Cannot execute scheduled payment '" + str(payment.id) + "'!")

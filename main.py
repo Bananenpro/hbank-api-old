@@ -38,7 +38,7 @@ def get_user(name):
     if can_view_balance:
         return jsonify({
             "name": user.name,
-            "balance": user.balance,
+            "balance": str(user.balance),
             "is_parent": user.is_parent
         })
     else:
@@ -206,7 +206,7 @@ def delete_scheduled_payment(payment_id):
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         payment = database.get_scheduled_payment(payment_id)
 
-        if user is None or payment.sender_name != user.name:
+        if user is None or payment is None or payment.sender_name != user.name:
             return "", 403
 
         if payment is None:
@@ -240,4 +240,4 @@ def get_log():
 
 
 if __name__ == "__main__":
-    app.run(host = "0.0.0.0")
+    app.run(host="0.0.0.0")
