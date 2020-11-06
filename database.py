@@ -33,7 +33,7 @@ def login_user(name, password):
     key = generate_hash(password.encode("utf-8"), salt)
     if key == password_hash_db:
         token_salt = os.urandom(32)
-        user.auth_token = (token_salt + generate_hash(os.urandom(64), token_salt)).decode("utf-8")
+        user.auth_token = str(token_salt + generate_hash(os.urandom(64), token_salt))
         user.token_expiration_date = datetime.now() + datetime.timedelta(days=1)
         return user.auth_token
     else:
@@ -59,10 +59,10 @@ def verify_auth_token(username, token):
         user.auth_token = None
         user.token_expiration_date = None
         return False
-    token_db = user.auth_token.encode("utf-8")
+    token_db = user.auth_token
     salt = token_db[:32]
     key_db = token_db[32:]
-    key = generate_hash(token[7:], salt)
+    key = str(generate_hash(token[7:], salt))
     if key == key_db:
         return True
     return False
