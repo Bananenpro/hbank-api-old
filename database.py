@@ -246,6 +246,7 @@ def execute_scheduled_payment(schedule_id):
                 sp.delete()
                 return False
         else:
+            sp.days += 1
             return True
     except ObjectNotFound:
         return False
