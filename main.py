@@ -73,7 +73,7 @@ def register():
                 "required_password_length": 6
             }), 500
     except KeyError:
-        return jsonify({}), 400
+        return "", 400
 
 
 @app.route("/login", methods=["POST"])
