@@ -61,7 +61,11 @@ def register():
 
         if password_length and name_length:
             database.create_user(body["name"], body["password"], body["is_parent"])
-            return "", 201
+            return jsonify({
+                "name_length": name_length,
+                "password_length": password_length,
+                "required_password_length": 6
+            }), 201
         else:
             return jsonify({
                 "name_length": name_length,
