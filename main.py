@@ -54,23 +54,28 @@ def register():
     try:
         name_length = False
         password_length = False
+        already_exists = False
         if len(body["name"]) > 1:
             name_length = True
         if len(body["password"]) >= 6:
             password_length = True
+        if database.get_user(body["name"]) is not None:
+            already_exists = True
 
-        if password_length and name_length:
+        if password_length and name_length and not already_exists:
             database.create_user(body["name"], body["password"], body["is_parent"])
             return jsonify({
                 "name_length": name_length,
                 "password_length": password_length,
-                "required_password_length": 6
+                "required_password_length": 6,
+                "already_exists": already_exists
             }), 201
         else:
             return jsonify({
                 "name_length": name_length,
                 "password_length": password_length,
-                "required_password_length": 6
+                "required_password_length": 6,
+                "already_exists": already_exists
             }), 500
     except KeyError:
         return "", 400
