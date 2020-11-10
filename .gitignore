@@ -1,2 +1,3 @@
-/uploads
+/uploads/*
+!/uploads/profile_pictures/empty.png
 database.sqlite
