@@ -125,7 +125,7 @@ def change_profile_picture():
             if extension != ".jpg" and extension != ".jpeg" and extension != ".png":
                 return "", 400
 
-            path = os.path.join(profile_picture_directory, str(uuid.uuid4()) + extension)
+            path = os.path.join(profile_picture_directory, str(uuid.uuid4()) + ".jpg")
             image.save(path)
             resize(path, 500.0)
             database.change_profile_picture_path(user.name, path)
@@ -148,7 +148,7 @@ def resize(filepath, target_size):
 
         new_dim = (int(width/factor), int(height/factor))
         new_image = image.resize(new_dim)
-        new_image.save(filepath)
+        new_image.save(filepath, "JPEG", dpi=[300, 300], quality=80)
 
 
 @app.route("/profile_picture/<string:name>")
