@@ -133,6 +133,8 @@ def change_profile_picture():
             return "", 400
     except KeyError:
         return "", 403
+    except Exception as e:
+        return str(repr(e)), 500
 
 
 @app.route("/profile_picture/<string:name>")
