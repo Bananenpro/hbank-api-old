@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request, send_file
 import database
 import uuid
-
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -103,7 +103,7 @@ def logout():
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
             return "", 403
-        
+
         database.logout_user(user.name)
         return "", 200
     except KeyError:
@@ -125,14 +125,30 @@ def change_profile_picture():
             if extension != ".jpg" and extension != ".jpeg" and extension != ".png":
                 return "", 400
 
-            path = os.path.join(profile_picture_directory, str(uuid.uuid4())+extension)
+            path = os.path.join(profile_picture_directory, str(uuid.uuid4()) + extension)
             image.save(path)
+            resize(path)
             database.change_profile_picture_path(user.name, path)
             return "", 200
         else:
             return "", 400
     except KeyError:
         return "", 403
+
+
+def resize(filepath, target_size):
+    if os.path.isfile(filepath):
+        image = Image.open(filepath)
+        width, height = image.size
+
+        if width > height:
+            factor = height / target_size
+        else:
+            factor = width / target_size
+
+        new_dim = (width/factor, height/factor)
+        new_image = image.resize(new_dim)
+        new_image.save(filepath)
 
 
 @app.route("/profile_picture/<string:name>")
@@ -214,7 +230,8 @@ def create_scheduled_payment():
         if user is None:
             return "", 403
         try:
-            if database.create_scheduled_payment(user.name, body["receiver"], body["amount"], body["schedule"], body["description"]):
+            if database.create_scheduled_payment(user.name, body["receiver"], body["amount"], body["schedule"],
+                                                 body["description"]):
                 return "", 201
             else:
                 return "", 400
@@ -254,7 +271,8 @@ def get_log():
             response.append({
                 "user": entry.sender_name if entry.receiver_name == user.name else entry.receiver_name,
                 "amount": str(entry.amount) if entry.receiver_name == user.name else str(-entry.amount),
-                "new_balance": str(entry.new_balance_receiver) if entry.receiver_name == user.name else str(entry.new_balance_sender),
+                "new_balance": str(entry.new_balance_receiver) if entry.receiver_name == user.name else str(
+                    entry.new_balance_sender),
                 "time": entry.time,
                 "description": entry.desc
             })
