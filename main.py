@@ -146,6 +146,7 @@ def get_profile_picture(name):
         picture = user.profile_picture
         if not os.path.isfile(picture):
             picture = os.path.join(profile_picture_directory, "empty.png")
+            database.change_profile_picture_path(user.name, "")
 
         return send_file(picture)
     except KeyError:
