@@ -127,7 +127,7 @@ def change_profile_picture():
 
             path = os.path.join(profile_picture_directory, str(uuid.uuid4()) + extension)
             image.save(path)
-            resize(path)
+            resize(path, 500.0)
             database.change_profile_picture_path(user.name, path)
             return "", 200
         else:
@@ -146,7 +146,7 @@ def resize(filepath, target_size):
         else:
             factor = width / target_size
 
-        new_dim = (width/factor, height/factor)
+        new_dim = (int(width/factor), int(height/factor))
         new_image = image.resize(new_dim)
         new_image.save(filepath)
 
