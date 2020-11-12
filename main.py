@@ -118,7 +118,7 @@ def change_profile_picture():
         if user is None:
             return "", 403
 
-        if "file" in request.files and request.files is not None and request.files != "":
+        if "profile_picture" in request.files and request.files is not None and request.files != "":
             image = request.files["profile_picture"]
             root, extension = os.path.splitext(image.filename)
 
@@ -130,7 +130,7 @@ def change_profile_picture():
             database.change_profile_picture_path(user.name, path)
             return "", 200
         else:
-            return 400
+            return "", 400
     except KeyError:
         return "", 403
 
