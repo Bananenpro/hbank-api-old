@@ -135,13 +135,13 @@ def change_profile_picture():
         return "", 403
 
 
-@app.route("/profile_picture")
-def get_profile_picture():
+@app.route("/profile_picture/<string:name>")
+def get_profile_picture(name):
     try:
-        user = database.get_user_by_auth_token(request.headers["Authorization"])
+        user = database.get_user(name)
 
         if user is None:
-            return "", 403
+            return "", 404
 
         picture = user.profile_picture
         if not os.path.isfile(picture):
