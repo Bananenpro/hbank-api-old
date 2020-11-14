@@ -6,7 +6,7 @@ class UserDto:
         self.is_parent = is_parent
 
 
-class ScheduledPaymentDto:
+class PaymentPlan:
     def __init__(self, schedule_id, sender_name, receiver_name, days, schedule, amount, desc):
         self.id = schedule_id
         self.sender_name = sender_name

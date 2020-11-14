@@ -201,14 +201,14 @@ def transfer_money():
         return "", 403
 
 
-@app.route("/scheduled_payment")
-def get_scheduled_payments():
+@app.route("/payment_plan")
+def get_payment_plans():
     response = []
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
             return "", 403
-        payments = database.get_scheduled_payments(user.name)
+        payments = database.get_payment_plans(user.name)
         for p in payments:
             response.append({
                 "id": p.id,
@@ -222,15 +222,15 @@ def get_scheduled_payments():
         return "", 403
 
 
-@app.route("/scheduled_payment", methods=["POST"])
-def create_scheduled_payment():
+@app.route("/payment_plan", methods=["POST"])
+def create_payment_plan():
     body = request.json
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
             return "", 403
         try:
-            if database.create_scheduled_payment(user.name, body["receiver"], body["amount"], body["schedule"],
+            if database.create_payment_plan(user.name, body["receiver"], body["amount"], body["schedule"],
                                                  body["description"]):
                 return "", 201
             else:
@@ -241,11 +241,11 @@ def create_scheduled_payment():
         return "", 403
 
 
-@app.route("/scheduled_payment/<int:payment_id>", methods=["DELETE"])
-def delete_scheduled_payment(payment_id):
+@app.route("/payment_plan/<int:payment_id>", methods=["DELETE"])
+def delete_payment_plan(payment_id):
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
-        payment = database.get_scheduled_payment(payment_id)
+        payment = database.get_payment_plan(payment_id)
 
         if user is None or payment is None or payment.sender_name != user.name:
             return "", 403
@@ -253,7 +253,7 @@ def delete_scheduled_payment(payment_id):
         if payment is None:
             return "", 404
 
-        database.delete_scheduled_payment(payment_id)
+        database.delete_payment_plan(payment_id)
         return "", 200
     except KeyError:
         return "", 403

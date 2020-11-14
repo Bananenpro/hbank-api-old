@@ -15,7 +15,7 @@ class User(db.Entity):
     token_expiration_date = orm.Optional(datetime)
 
 
-class ScheduledPayment(db.Entity):
+class PaymentPlan(db.Entity):
     sender_name = orm.Required(str)
     receiver_name = orm.Required(str)
     days = orm.Required(int)

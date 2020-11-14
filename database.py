@@ -138,7 +138,7 @@ def delete_user(name):
                 if User.get(name=entry.sender_name) is None:
                     entry.delete()
 
-        delete(sp for sp in ScheduledPayment if sp.sender_name == name or sp.receiver_name == name)
+        delete(sp for sp in PaymentPlan if sp.sender_name == name or sp.receiver_name == name)
 
         if user.profile_picture is not None and os.path.isfile(user.profile_picture):
             os.remove(user.profile_picture)
@@ -176,61 +176,61 @@ def change_profile_picture(username, profile_picture):
         return
 
 
-# Scheduled Payment
+# Payment Plan
 
 
 @db_session
-def get_all_scheduled_payments():
-    schedules = select(sp for sp in ScheduledPayment)
+def get_all_payment_plans():
+    schedules = select(sp for sp in PaymentPlan)
     dtos = []
     for s in schedules:
-        dtos.append(ScheduledPaymentDto(s.id, s.sender_name, s.receiver_name, s.days, s.schedule, s.amount, s.desc))
+        dtos.append(PaymentPlan(s.id, s.sender_name, s.receiver_name, s.days, s.schedule, s.amount, s.desc))
     return dtos
 
 
 @db_session
-def get_scheduled_payments(username):
-    schedules = select(sp for sp in ScheduledPayment if sp.sender_name == username)
+def get_payment_plans(username):
+    schedules = select(sp for sp in PaymentPlan if sp.sender_name == username)
     dtos = []
     for s in schedules:
-        dtos.append(ScheduledPaymentDto(s.id, s.sender_name, s.receiver_name, s.days, s.schedule, s.amount, s.desc))
+        dtos.append(PaymentPlan(s.id, s.sender_name, s.receiver_name, s.days, s.schedule, s.amount, s.desc))
     return dtos
 
 
 @db_session
-def create_scheduled_payment(sender_name, receiver_name, amount_str, schedule, description):
+def create_payment_plan(sender_name, receiver_name, amount_str, schedule, description):
     try:
         sender = User[sender_name]
         receiver = User[receiver_name]
     except ObjectNotFound:
         return False
     amount = Decimal(amount_str.replace(",", "."))
-    ScheduledPayment(sender_name=sender_name, receiver_name=receiver_name, days=0, schedule=schedule, amount=amount, desc=description)
+    PaymentPlan(sender_name=sender_name, receiver_name=receiver_name, days=0, schedule=schedule, amount=amount, desc=description)
     return True
 
 
 @db_session
-def get_scheduled_payment(schedule_id):
+def get_payment_plan(schedule_id):
     try:
-        payment = ScheduledPayment[schedule_id]
-        return ScheduledPaymentDto(schedule_id, payment.sender_name, payment.receiver_name, payment.days, payment.schedule, payment.amount, payment.desc)
+        payment = PaymentPlan[schedule_id]
+        return PaymentPlan(schedule_id, payment.sender_name, payment.receiver_name, payment.days, payment.schedule, payment.amount, payment.desc)
     except ObjectNotFound:
         return
 
 
 @db_session
-def delete_scheduled_payment(schedule_id):
+def delete_payment_plan(schedule_id):
     try:
-        schedule = ScheduledPayment[schedule_id]
+        schedule = PaymentPlan[schedule_id]
         schedule.delete()
     except ObjectNotFound:
         return
 
 
 @db_session
-def execute_scheduled_payment(schedule_id):
+def execute_payment_plan(schedule_id):
     try:
-        sp = ScheduledPayment[schedule_id]
+        sp = PaymentPlan[schedule_id]
 
         sp.days += 1
 
