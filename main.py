@@ -187,9 +187,14 @@ def delete_user(name):
 def transfer_money():
     body = request.json
     try:
+
+        if not body["amount"].replace(",", ".").isnumeric() or body["amount"].startswith("-"):
+            return 400
+
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
             return "", 403
+
         try:
             if database.transfer_money(user.name, body["receiver"], body["amount"], body["description"]):
                 return "", 200
@@ -226,12 +231,15 @@ def get_payment_plans():
 def create_payment_plan():
     body = request.json
     try:
+
+        if not body["amount"].replace(",", ".").isnumeric() or body["amount"].startswith("-"):
+            return 400
+
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
             return "", 403
         try:
-            if database.create_payment_plan(user.name, body["receiver"], body["amount"], body["schedule"],
-                                                 body["description"]):
+            if database.create_payment_plan(user.name, body["receiver"], body["amount"], body["schedule"], body["description"]):
                 return "", 201
             else:
                 return "", 400
