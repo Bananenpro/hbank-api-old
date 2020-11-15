@@ -225,7 +225,7 @@ def get_payment_plans(name):
             response.append({
                 "id": p.id,
                 "schedule": p.schedule,
-                "amount": str(p.amount),
+                "amount": str(p.amount) if p.sender_name == name else str(-p.amount),
                 "description": p.desc
             })
         return jsonify(response)
