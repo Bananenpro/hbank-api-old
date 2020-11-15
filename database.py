@@ -193,7 +193,7 @@ def get_payment_plans(username, username2):
     payments = select(pp for pp in PaymentPlan if (pp.sender_name == username and pp.receiver_name == username2) or (pp.sender_name == username2 and pp.receiver_name == username))
     dtos = []
     for p in payments:
-        dtos.append(PaymentPlan(p.id, p.sender_name, p.receiver_name, p.days, p.schedule, p.amount, p.desc))
+        dtos.append(PaymentPlanDto(p.id, p.sender_name, p.receiver_name, p.days, p.schedule, p.amount, p.desc))
     return dtos
 
 
@@ -213,7 +213,7 @@ def create_payment_plan(sender_name, receiver_name, amount_str, schedule, descri
 def get_payment_plan(payment_id):
     try:
         payment = PaymentPlan[payment_id]
-        return PaymentPlan(payment_id, payment.sender_name, payment.receiver_name, payment.days, payment.schedule, payment.amount, payment.desc)
+        return PaymentPlanDto(payment_id, payment.sender_name, payment.receiver_name, payment.days, payment.schedule, payment.amount, payment.desc)
     except ObjectNotFound:
         return
 
