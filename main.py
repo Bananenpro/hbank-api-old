@@ -197,7 +197,7 @@ def transfer_money():
 
         try:
             if database.transfer_money(user.name, body["receiver"], body["amount"], body["description"]):
-                return "Success!", 200
+                return "", 200
             else:
                 return "", 400
         except KeyError:
