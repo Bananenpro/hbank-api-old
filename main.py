@@ -213,18 +213,17 @@ def transfer_money():
         return "", 403
 
 
-@app.route("/payment_plan")
-def get_payment_plans():
+@app.route("/payment_plan/<string:name>")
+def get_payment_plans(name):
     response = []
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
             return "", 403
-        payments = database.get_payment_plans(user.name)
+        payments = database.get_payment_plans(user.name, name)
         for p in payments:
             response.append({
                 "id": p.id,
-                "receiver": p.receiver_name,
                 "schedule": p.schedule,
                 "amount": str(p.amount),
                 "description": p.desc

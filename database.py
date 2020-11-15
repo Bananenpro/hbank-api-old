@@ -189,8 +189,8 @@ def get_all_payment_plans():
 
 
 @db_session
-def get_payment_plans(username):
-    payments = select(pp for pp in PaymentPlan if pp.sender_name == username)
+def get_payment_plans(username, username2):
+    payments = select(pp for pp in PaymentPlan if (pp.sender_name == username and pp.receiver_name == username2) or (pp.sender_name == username2 and pp.receiver_name == username))
     dtos = []
     for p in payments:
         dtos.append(PaymentPlan(p.id, p.sender_name, p.receiver_name, p.days, p.schedule, p.amount, p.desc))
