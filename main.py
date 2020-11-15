@@ -1,4 +1,6 @@
 import os
+from decimal import Decimal, InvalidOperation
+
 from flask import Flask, jsonify, request, send_file
 import database
 import uuid
@@ -188,7 +190,12 @@ def transfer_money():
     body = request.json
     try:
 
-        if not body["amount"].replace(",", ".").isnumeric() or body["amount"].startswith("-"):
+        try:
+            Decimal(body["amount"].replace(",", "."))
+        except InvalidOperation:
+            return 400
+
+        if body["amount"].startswith("-"):
             return 400
 
         user = database.get_user_by_auth_token(request.headers["Authorization"])
@@ -232,7 +239,12 @@ def create_payment_plan():
     body = request.json
     try:
 
-        if not body["amount"].replace(",", ".").isnumeric() or body["amount"].startswith("-"):
+        try:
+            Decimal(body["amount"].replace(",", "."))
+        except InvalidOperation:
+            return 400
+
+        if body["amount"].startswith("-"):
             return 400
 
         user = database.get_user_by_auth_token(request.headers["Authorization"])
