@@ -157,7 +157,7 @@ def transfer_money(sender_name, receiver_name, amount_str, description):
         sender = User[sender_name]
         receiver = User[receiver_name]
 
-        if sender.balance > amount:
+        if sender.balance >= amount:
             sender.balance -= amount
             receiver.balance += amount
             create_log_entry(sender.name, receiver.name, amount, sender.balance, receiver.balance, datetime.now(), description)
@@ -238,7 +238,7 @@ def execute_payment_plan(payment_id):
             try:
                 sender = User[pp.sender_name]
                 receiver = User[pp.receiver_name]
-                if sender.balance > pp.amount:
+                if sender.balance >= pp.amount:
                     sender.balance -= pp.amount
                     receiver.balance += pp.amount
                     create_log_entry(sender.name, receiver.name, pp.amount, sender.balance, receiver.balance, datetime.now(), pp.desc)
