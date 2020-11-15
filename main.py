@@ -233,7 +233,7 @@ def get_payment_plans(name):
         return "", 403
 
 
-@app.route("payment_plan/<int:payment_id>")
+@app.route("/payment_plan/<int:payment_id>")
 def get_payment_plan(payment_id):
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
