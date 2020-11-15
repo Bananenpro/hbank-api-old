@@ -213,7 +213,7 @@ def transfer_money():
         return "", 403
 
 
-@app.route("/payment_plan/<string:name>")
+@app.route("/payment_plans/<string:name>")
 def get_payment_plans(name):
     response = []
     try:
