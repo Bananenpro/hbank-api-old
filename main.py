@@ -233,6 +233,25 @@ def get_payment_plans(name):
         return "", 403
 
 
+@app.route("payment_plan/<int:payment_id>")
+def get_payment_plan(payment_id):
+    try:
+        user = database.get_user_by_auth_token(request.headers["Authorization"])
+        plan = database.get_payment_plan(payment_id)
+        if user is None or plan is None or (plan.sender_name != user.name and plan.receiver_name != user.name):
+            return "", 403
+
+        return jsonify({
+            "id": payment_id,
+            "schedule": plan.schedule,
+            "amount": "+" + str(plan.amount) if plan.sender_name == user.name else "-" + str(plan.amount),
+            "description": plan.desc
+        })
+
+    except KeyError:
+        return "", 403
+
+
 @app.route("/payment_plan", methods=["POST"])
 def create_payment_plan():
     body = request.json
