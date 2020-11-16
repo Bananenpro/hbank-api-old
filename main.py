@@ -245,7 +245,7 @@ def get_payment_plan(payment_id):
         return jsonify({
             "id": payment_id,
             "schedule": plan.schedule,
-            "amount": "+" + str(plan.amount) if plan.sender_name == user.name else "-" + str(plan.amount),
+            "amount": "+" + str(plan.amount) if plan.receiver_name == user.name else "-" + str(plan.amount),
             "description": plan.desc,
             "days_left": plan.schedule - plan.days
         })
