@@ -226,7 +226,8 @@ def get_payment_plans(name):
                 "id": p.id,
                 "schedule": p.schedule,
                 "amount": "+" + str(p.amount) if p.sender_name == name else "-" + str(p.amount),
-                "description": p.desc
+                "description": p.desc,
+                "days_left": p.schedule - p.days
             })
         return jsonify(response)
     except KeyError:
@@ -245,7 +246,8 @@ def get_payment_plan(payment_id):
             "id": payment_id,
             "schedule": plan.schedule,
             "amount": "+" + str(plan.amount) if plan.sender_name == user.name else "-" + str(plan.amount),
-            "description": plan.desc
+            "description": plan.desc,
+            "days_left": plan.schedule - plan.days
         })
 
     except KeyError:
