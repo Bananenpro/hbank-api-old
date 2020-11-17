@@ -1,4 +1,5 @@
 import os
+import pytz
 from decimal import Decimal, InvalidOperation
 
 from datetime import datetime
@@ -313,7 +314,7 @@ def get_log(page):
             date_str = entry.time.strftime("%d.%m.%Y")
             date_str = date_str[:-4]+date_str[-2:]
 
-            today_str = datetime.now().strftime("%d.%m.%Y")
+            today_str = datetime.now(pytz.timezone(database.TIMEZONE)).strftime("%d.%m.%Y")
             today_str = today_str[:-4]+today_str[-2:]
 
             if date_str == today_str:

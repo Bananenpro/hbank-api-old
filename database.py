@@ -1,6 +1,7 @@
 import os
 import uuid
 from datetime import datetime, timedelta
+import pytz
 import hashlib
 
 from pony.orm import *
@@ -8,9 +9,11 @@ from models import *
 from dtos import *
 
 db.bind(provider="sqlite", filename="database.sqlite", create_db=True)
-db.generate_mapping(create_tables=True)
+db.generate_mapping(create_tables=True) 
 
+TIMEZONE = "Europe/Berlin"
 LOG_PAGE_SIZE = 10
+
 
 # User
 @db_session
@@ -36,7 +39,7 @@ def login_user(name, password):
         key = generate_hash(password.encode("utf-8"), salt)
         if key == password_hash_db:
             user.auth_token = str(uuid.uuid4())
-            user.token_expiration_date = datetime.now() + timedelta(days=30)
+            user.token_expiration_date = datetime.now(pytz.timezone(TIMEZONE)) + timedelta(days=30)
             return user.auth_token
         else:
             return None
@@ -62,7 +65,7 @@ def verify_auth_token(username, token):
         user = User[username]
         if user.auth_token is None or user.token_expiration_date is None:
             return False
-        if user.token_expiration_date < datetime.now():
+        if user.token_expiration_date < datetime.now(pytz.timezone(TIMEZONE)):
             user.auth_token = ""
             user.token_expiration_date = None
             return False
@@ -83,7 +86,7 @@ def get_user_by_auth_token(token):
     user = User.get(auth_token=token[7:])
     if user is None or user.auth_token is None or user.token_expiration_date is None:
         return None
-    if user.token_expiration_date < datetime.now():
+    if user.token_expiration_date < datetime.now(pytz.timezone(TIMEZONE)):
         user.auth_token = ""
         user.token_expiration_date = None
         return None
@@ -161,7 +164,7 @@ def transfer_money(sender_name, receiver_name, amount_str, description):
         if sender.balance >= amount:
             sender.balance -= amount
             receiver.balance += amount
-            create_log_entry(sender.name, receiver.name, amount, sender.balance, receiver.balance, datetime.now(), description)
+            create_log_entry(sender.name, receiver.name, amount, sender.balance, receiver.balance, datetime.now(pytz.timezone(TIMEZONE)), description)
             return True
     except ObjectNotFound:
         return False
@@ -242,7 +245,7 @@ def execute_payment_plan(payment_id):
                 if sender.balance >= pp.amount:
                     sender.balance -= pp.amount
                     receiver.balance += pp.amount
-                    create_log_entry(sender.name, receiver.name, pp.amount, sender.balance, receiver.balance, datetime.now(), pp.desc)
+                    create_log_entry(sender.name, receiver.name, pp.amount, sender.balance, receiver.balance, datetime.now(pytz.timezone(TIMEZONE)), pp.desc)
                 pp.days -= pp.schedule
                 return True
             except ObjectNotFound:
