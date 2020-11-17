@@ -317,7 +317,7 @@ def get_log(page):
             today_str = today_str[:-4]+today_str[-2:]
 
             if date_str == today_str:
-                date_str = str(datetime.now().hour - entry.time.hour) + "h"
+                date_str = entry.time.strftime("%H:%M")
 
             response.append({
                 "id": entry.id,
