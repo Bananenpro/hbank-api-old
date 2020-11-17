@@ -312,14 +312,14 @@ def get_log(page):
         log = database.get_log(user.name, page)
         response = []
         for entry in log:
-            date_str = pytz.timezone(TIMEZONE).localize(entry.time).strftime("%d.%m.%Y")
+            date_str = entry.time.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y")
             date_str = date_str[:-4]+date_str[-2:]
 
-            today_str = pytz.timezone(TIMEZONE).localize(datetime.now()).strftime("%d.%m.%Y")
+            today_str = datetime.now().astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y")
             today_str = today_str[:-4]+today_str[-2:]
 
             if date_str == today_str:
-                date_str = pytz.timezone(TIMEZONE).localize(entry.time).strftime("%H:%M")
+                date_str = entry.time.astimezone(pytz.timezone(TIMEZONE)).strftime("%H:%M")
 
             response.append({
                 "id": entry.id,
@@ -335,14 +335,14 @@ def get_log(page):
         return "", 403
 
 
-@app.route("/log/item/<int:id>")
-def get_log_item(id):
+@app.route("/log/item/<int:item_id>")
+def get_log_item(item_id):
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
             return "", 403
 
-        log_item = database.get_log_item(id)
+        log_item = database.get_log_item(item_id)
 
         if log_item is None:
             return "", 404
@@ -356,7 +356,7 @@ def get_log_item(id):
             "amount": str(log_item.amount) if log_item.receiver_name == user.name else str(-log_item.amount),
             "new_balance": str(log_item.new_balance_receiver) if log_item.receiver_name == user.name else str(
                 log_item.new_balance_sender),
-            "date": pytz.timezone(TIMEZONE).localize(log_item.time).strftime("%d.%m.%Y - %H:%M"),
+            "date": log_item.time.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y - %H:%M"),
             "description": log_item.desc
         })
     except KeyError:
