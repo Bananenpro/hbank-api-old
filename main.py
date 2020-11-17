@@ -1,6 +1,8 @@
 import os
 from decimal import Decimal, InvalidOperation
 
+from datetime import datetime
+
 from flask import Flask, jsonify, request, send_file
 import database
 import uuid
@@ -308,15 +310,22 @@ def get_log(page):
         log = database.get_log(user.name, page)
         response = []
         for entry in log:
-            date = entry.time.strftime("%d.%m.%Y")
-            date = date[:-4]+date[-2:]
+            date_str = entry.time.strftime("%d.%m.%Y")
+            date_str = date_str[:-4]+date_str[-2:]
+
+            today_str = datetime.now().strftime("%d.%m.%Y")
+            today_str = today_str[:-4]+today_str[-2:]
+
+            if date_str == today_str:
+                date_str = str(datetime.now().hour - entry.time.hour) + "h"
+
             response.append({
                 "id": entry.id,
                 "username": entry.sender_name if entry.receiver_name == user.name else entry.receiver_name,
                 "amount": str(entry.amount) if entry.receiver_name == user.name else str(-entry.amount),
                 "new_balance": str(entry.new_balance_receiver) if entry.receiver_name == user.name else str(
                     entry.new_balance_sender),
-                "date": date,
+                "date": date_str,
                 "description": entry.desc
             })
         return jsonify(response)
