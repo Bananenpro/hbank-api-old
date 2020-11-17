@@ -333,5 +333,33 @@ def get_log(page):
         return "", 403
 
 
+@app.route("/log/item/<int:id>")
+def get_log_item(id):
+    try:
+        user = database.get_user_by_auth_token(request.headers["Authorization"])
+        if user is None:
+            return "", 403
+
+        log_item = database.get_log_item(id)
+
+        if log_item is None:
+            return "", 404
+
+        if log_item.sender_name != user.name and log_item.receiver_name != user.name:
+            return "", 403
+
+        return jsonify({
+            "id": log_item.id,
+            "username": log_item.sender_name if log_item.receiver_name == user.name else log_item.receiver_name,
+            "amount": str(log_item.amount) if log_item.receiver_name == user.name else str(-log_item.amount),
+            "new_balance": str(log_item.new_balance_receiver) if log_item.receiver_name == user.name else str(
+                log_item.new_balance_sender),
+            "date": log_item.time.strftime("%d.%m.%Y - %H:%M"),
+            "description": log_item.desc
+        })
+    except KeyError:
+        return "", 403
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

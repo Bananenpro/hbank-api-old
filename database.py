@@ -216,7 +216,7 @@ def get_payment_plan(payment_id):
         payment = PaymentPlan[payment_id]
         return PaymentPlanDto(payment_id, payment.sender_name, payment.receiver_name, payment.days, payment.schedule, payment.amount, payment.desc)
     except ObjectNotFound:
-        return
+        return None
 
 
 @db_session
@@ -273,3 +273,12 @@ def get_log(username, page):
     for entry in log:
         dtos.append(LogDto(entry.id, entry.sender_name, entry.receiver_name, entry.amount, entry.new_balance_sender, entry.new_balance_receiver, entry.time, entry.desc))
     return dtos
+
+
+@db_session
+def get_log_item(log_id):
+    try:
+        item = Log[log_id]
+        return LogDto(item.id, item.sender_name, item.receiver_name, item.amount, item.new_balance_sender, item.new_balance_receiver, item.time, item.desc)
+    except ObjectNotFound:
+        return None
