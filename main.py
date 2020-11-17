@@ -12,6 +12,7 @@ from PIL import Image
 app = Flask(__name__)
 
 profile_picture_directory = 'uploads/profile_pictures/'
+TIMEZONE = "Europe/Berlin"
 
 
 @app.route("/user")
@@ -311,14 +312,14 @@ def get_log(page):
         log = database.get_log(user.name, page)
         response = []
         for entry in log:
-            date_str = entry.time.strftime("%d.%m.%Y")
+            date_str = entry.time.replace(tzinfo=pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y")
             date_str = date_str[:-4]+date_str[-2:]
 
-            today_str = datetime.now(pytz.timezone(database.TIMEZONE)).strftime("%d.%m.%Y")
+            today_str = datetime.now().replace(tzinfo=pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y")
             today_str = today_str[:-4]+today_str[-2:]
 
             if date_str == today_str:
-                date_str = entry.time.strftime("%H:%M")
+                date_str = entry.time.replace(tzinfo=pytz.timezone(TIMEZONE)).strftime("%H:%M")
 
             response.append({
                 "id": entry.id,
@@ -355,7 +356,7 @@ def get_log_item(id):
             "amount": str(log_item.amount) if log_item.receiver_name == user.name else str(-log_item.amount),
             "new_balance": str(log_item.new_balance_receiver) if log_item.receiver_name == user.name else str(
                 log_item.new_balance_sender),
-            "date": log_item.time.strftime("%d.%m.%Y - %H:%M"),
+            "date": log_item.time.replace(tzinfo=pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y - %H:%M"),
             "description": log_item.desc
         })
     except KeyError:
