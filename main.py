@@ -308,12 +308,15 @@ def get_log(page):
         log = database.get_log(user.name, page)
         response = []
         for entry in log:
+            date = entry.time.strftime("%d.%m.%Y")
+            date = date[:-4]+date[-2:]
             response.append({
-                "user": entry.sender_name if entry.receiver_name == user.name else entry.receiver_name,
+                "id": entry.id,
+                "username": entry.sender_name if entry.receiver_name == user.name else entry.receiver_name,
                 "amount": str(entry.amount) if entry.receiver_name == user.name else str(-entry.amount),
                 "new_balance": str(entry.new_balance_receiver) if entry.receiver_name == user.name else str(
                     entry.new_balance_sender),
-                "time": entry.time,
+                "date": date,
                 "description": entry.desc
             })
         return jsonify(response)
