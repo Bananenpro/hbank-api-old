@@ -324,7 +324,7 @@ def get_log(page):
             response.append({
                 "id": entry.id,
                 "username": entry.sender_name if entry.receiver_name == user.name else entry.receiver_name,
-                "amount": str(entry.amount) if entry.receiver_name == user.name else str(-entry.amount),
+                "amount": "+" + str(entry.amount) if entry.receiver_name == user.name else "-" + str(entry.amount),
                 "new_balance": str(entry.new_balance_receiver) if entry.receiver_name == user.name else str(
                     entry.new_balance_sender),
                 "date": date_str,
@@ -353,7 +353,7 @@ def get_log_item(item_id):
         return jsonify({
             "id": log_item.id,
             "username": log_item.sender_name if log_item.receiver_name == user.name else log_item.receiver_name,
-            "amount": str(log_item.amount) if log_item.receiver_name == user.name else str(-log_item.amount),
+            "amount": "+" + str(log_item.amount) if log_item.receiver_name == user.name else "-" + str(log_item.amount),
             "new_balance": str(log_item.new_balance_receiver) if log_item.receiver_name == user.name else str(
                 log_item.new_balance_sender),
             "date": log_item.time.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y - %H:%M"),
