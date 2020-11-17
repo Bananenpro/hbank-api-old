@@ -10,6 +10,7 @@ from dtos import *
 db.bind(provider="sqlite", filename="database.sqlite", create_db=True)
 db.generate_mapping(create_tables=True)
 
+LOG_PAGE_SIZE = 10
 
 # User
 @db_session
@@ -260,8 +261,14 @@ def create_log_entry(sender_name, receiver_name, amount, new_balance_sender, new
 
 
 @db_session
-def get_log(username):
-    log = select(entry for entry in Log if entry.sender_name == username or entry.receiver_name == username).order_by(desc(Log.time))
+def get_log(username, page):
+    try:
+        log = select(entry for entry in Log if entry.sender_name == username or entry.receiver_name == username).order_by(desc(Log.time))[page*LOG_PAGE_SIZE:page+LOG_PAGE_SIZE+page]
+    except IndexError:
+        try:
+            log = select(entry for entry in Log if entry.sender_name == username or entry.receiver_name == username).order_by(desc(Log.time))[page*LOG_PAGE_SIZE:]
+        except IndexError:
+            return []
     dtos = []
     for entry in log:
         dtos.append(LogDto(entry.id, entry.sender_name, entry.receiver_name, entry.amount, entry.new_balance_sender, entry.new_balance_receiver, entry.time, entry.desc))

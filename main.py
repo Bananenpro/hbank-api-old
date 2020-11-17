@@ -299,13 +299,13 @@ def delete_payment_plan(payment_id):
         return "", 403
 
 
-@app.route("/log")
-def get_log():
+@app.route("/log/<int:page>")
+def get_log(page):
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
             return "", 403
-        log = database.get_log(user.name)
+        log = database.get_log(user.name, page)
         response = []
         for entry in log:
             response.append({
