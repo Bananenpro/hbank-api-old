@@ -187,7 +187,7 @@ def get_all_payment_plans():
     payments = select(pp for pp in PaymentPlan)
     dtos = []
     for p in payments:
-        dtos.append(PaymentPlan(p.id, p.sender_name, p.receiver_name, p.days, p.schedule, p.amount, p.desc))
+        dtos.append(PaymentPlanDto(p.id, p.sender_name, p.receiver_name, p.days, p.schedule, p.amount, p.desc))
     return dtos
 
 
