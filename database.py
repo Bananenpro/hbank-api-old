@@ -237,9 +237,6 @@ def execute_payment_plan(payment_id):
 
         pp.days += 1
 
-        if pp.days < pp.schedule:
-            return True
-
         while pp.days >= pp.schedule:
             try:
                 sender = User[pp.sender_name]
@@ -248,14 +245,14 @@ def execute_payment_plan(payment_id):
                     sender.balance -= pp.amount
                     receiver.balance += pp.amount
                     create_log_entry(sender.name, receiver.name, pp.amount, sender.balance, receiver.balance, datetime.now(), pp.desc)
-                pp.days -= pp.schedule
-                return True
+                    pp.days -= pp.schedule
+                else:
+                    return
             except ObjectNotFound:
                 pp.delete()
-                return False
-
+                return
     except ObjectNotFound:
-        return False
+        return
 
 
 # Log
