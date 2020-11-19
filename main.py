@@ -1,6 +1,6 @@
 import os
 import pytz
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, getcontext
 
 from datetime import datetime
 

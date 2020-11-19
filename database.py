@@ -154,7 +154,7 @@ def delete_user(name):
 @db_session
 def transfer_money(sender_name, receiver_name, amount_str, description):
 
-    amount = abs(Decimal(amount_str.replace(",", ".")))
+    amount = round(abs(Decimal(amount_str.replace(",", "."))), 2)
 
     try:
         sender = User[sender_name]
@@ -207,7 +207,7 @@ def create_payment_plan(sender_name, receiver_name, amount_str, schedule, descri
         receiver = User[receiver_name]
     except ObjectNotFound:
         return False
-    amount = abs(Decimal(amount_str.replace(",", ".")))
+    amount = round(abs(Decimal(amount_str.replace(",", "."))), 2)
     PaymentPlan(sender_name=sender_name, receiver_name=receiver_name, days=0, schedule=schedule, amount=amount, desc=description)
     return True
 
