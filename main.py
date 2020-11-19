@@ -363,5 +363,23 @@ def get_log_item(item_id):
         return "", 403
 
 
+@app.route("/version/android")
+def version():
+    file = open("app/android/version", "r")
+    app_version = file.read()
+    file.close()
+    return jsonify({
+        "version": int(app_version)
+    })
+
+
+@app.route("/apk")
+def apk():
+    try:
+        return send_file("app/android/h-bank.apk")
+    except Exception:
+        return "", 500
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
