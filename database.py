@@ -237,7 +237,10 @@ def execute_payment_plan(payment_id):
 
         pp.days += 1
 
-        if pp.days >= pp.schedule:
+        if pp.days < pp.schedule:
+            return True
+
+        while pp.days >= pp.schedule:
             try:
                 sender = User[pp.sender_name]
                 receiver = User[pp.receiver_name]
@@ -250,8 +253,7 @@ def execute_payment_plan(payment_id):
             except ObjectNotFound:
                 pp.delete()
                 return False
-        else:
-            return True
+
     except ObjectNotFound:
         return False
 
