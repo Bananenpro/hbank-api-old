@@ -93,7 +93,7 @@ def get_user_by_auth_token(token):
 
 
 def generate_hash(password, salt):
-    return hashlib.pbkdf2_hmac("sha256", password, salt, 1000000)
+    return hashlib.pbkdf2_hmac("sha256", password, salt, 10000)
 
 
 @db_session
