@@ -225,17 +225,21 @@ def get_payment_plan(payment_id):
 def delete_payment_plan(payment_id):
     try:
         payment = PaymentPlan[payment_id]
-        payment.delete()
+        if execute_payment_plan(payment_id, False):
+            payment.delete()
+            return True
     except ObjectNotFound:
-        return
+        return False
+    return False
 
 
 @db_session
-def execute_payment_plan(payment_id):
+def execute_payment_plan(payment_id, add_days):
     try:
         pp = PaymentPlan[payment_id]
 
-        pp.days += 1
+        if add_days:
+            pp.days += 1
 
         while pp.days >= pp.schedule:
             try:
@@ -247,12 +251,13 @@ def execute_payment_plan(payment_id):
                     create_log_entry(sender.name, receiver.name, pp.amount, sender.balance, receiver.balance, datetime.now(), pp.desc)
                     pp.days -= pp.schedule
                 else:
-                    return
+                    return False
             except ObjectNotFound:
                 pp.delete()
-                return
+                return True
     except ObjectNotFound:
-        return
+        return True
+    return True
 
 
 # Log

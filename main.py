@@ -297,8 +297,10 @@ def delete_payment_plan(payment_id):
         if payment is None:
             return "", 404
 
-        database.delete_payment_plan(payment_id)
-        return "", 200
+        if database.delete_payment_plan(payment_id):
+            return "", 200
+        else:
+            return "", 500
     except KeyError:
         return "", 403
 
