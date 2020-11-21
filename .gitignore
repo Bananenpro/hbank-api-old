@@ -4,5 +4,4 @@ uploads/profile_pictures/*
 !uploads/profile_pictures/empty.png
 database.sqlite
 /app
-/app/*
 /__pycache__
