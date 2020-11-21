@@ -1,5 +1,6 @@
 #!/bin/bash
 cd ~
+sudo raspi-config
 sudo apt update && sudo apt upgrade
 sudo apt install python3-pip rclone
 git config --global credential.helper store
