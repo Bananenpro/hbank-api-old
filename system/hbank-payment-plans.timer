@@ -1,0 +1,10 @@
+[Unit]
+Description=Run H-Bank Payment Plans Daily
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

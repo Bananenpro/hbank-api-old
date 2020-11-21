@@ -1,0 +1,11 @@
+[Unit]
+Description=H-Bank Payment Plans
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 -u payment_plans.py
+WorkingDirectory=/home/pi/h-bank
+StandardOutput=inherit
+StandardError=inherit
+User=pi
+Type=oneshot
