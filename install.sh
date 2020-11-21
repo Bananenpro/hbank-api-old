@@ -2,7 +2,7 @@
 cd ~
 sudo raspi-config
 sudo apt update && sudo apt upgrade
-sudo apt install python3-pip rclone git
+sudo apt install python3-pip rclone git vim
 git config --global credential.helper store
 git clone https://gitlab.com/Bananenpro05/h-bank.git
 cd h-bank
