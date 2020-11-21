@@ -1,0 +1,11 @@
+[Unit]
+Description=Mount OneDrive
+After=network.target
+
+[Service]
+User=pi
+ExecStart=rclone --vfs-cache-mode writes mount onedrive: ~/OneDrive
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
