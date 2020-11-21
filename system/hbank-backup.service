@@ -1,0 +1,11 @@
+[Unit]
+Description=H-Bank Backup
+After=network.target
+
+[Service]
+ExecStart=/home/pi/h-bank/system/backup.sh
+WorkingDirectory=/home/pi/h-bank
+StandardOutput=inherit
+StandardError=inherit
+User=pi
+Type=oneshot
