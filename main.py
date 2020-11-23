@@ -177,6 +177,21 @@ def get_profile_picture(name):
         return "", 500
 
 
+@app.route("/profile_picture_id/<string:name>")
+def get_profile_picture(name):
+    try:
+        user = database.get_user(name)
+
+        if user is None:
+            return "", 404
+
+        profile_picture_id = user.profile_picture_id
+
+        return jsonify({"id": profile_picture_id})
+    except KeyError:
+        return "", 403
+
+
 @app.route("/user/<string:name>", methods=["DELETE"])
 def delete_user(name):
     try:

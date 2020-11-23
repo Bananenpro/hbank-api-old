@@ -10,6 +10,7 @@ class User(db.Entity):
     password_hash = orm.Required(bytes)
     balance = orm.Required(Decimal)
     profile_picture = orm.Optional(str)
+    profile_picture_id = orm.Required(int)
     is_parent = orm.Required(bool)
     auth_token = orm.Optional(str)
     token_expiration_date = orm.Optional(datetime)
