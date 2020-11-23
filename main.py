@@ -178,7 +178,7 @@ def get_profile_picture(name):
 
 
 @app.route("/profile_picture_id/<string:name>")
-def get_profile_picture(name):
+def get_profile_picture_id(name):
     try:
         user = database.get_user(name)
 
