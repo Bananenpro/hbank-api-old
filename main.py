@@ -171,25 +171,20 @@ def get_profile_picture(name):
             database.change_profile_picture_path(user.name, "")
 
         return send_file(picture)
-    except KeyError:
-        return "", 403
     except Exception:
         return "", 500
 
 
 @app.route("/profile_picture_id/<string:name>")
 def get_profile_picture_id(name):
-    try:
-        user = database.get_user(name)
+    user = database.get_user(name)
 
-        if user is None:
-            return "", 404
+    if user is None:
+        return "", 404
 
-        profile_picture_id = user.profile_picture_id
+    profile_picture_id = user.profile_picture_id
 
-        return jsonify({"id": profile_picture_id})
-    except KeyError:
-        return "", 403
+    return jsonify({"id": profile_picture_id})
 
 
 @app.route("/user/<string:name>", methods=["DELETE"])
