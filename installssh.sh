@@ -5,6 +5,7 @@ git clone https://gitlab.com/Bananenpro05/h-bank.git
 cd h-bank
 mkdir app
 mkdir app/android
+echo "10" > app/android/version
 pip3 install Flask pony Pillow pytz
 sudo cp system/hbank.service /etc/systemd/system/
 sudo systemctl enable hbank.service
