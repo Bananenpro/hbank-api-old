@@ -1,10 +1,11 @@
 import os
 import pytz
-from decimal import Decimal, InvalidOperation, getcontext
+from decimal import Decimal, InvalidOperation
 
 from datetime import datetime
 
 from flask import Flask, jsonify, request, send_file
+from waitress import serve
 import database
 import uuid
 from PIL import Image
@@ -394,4 +395,4 @@ def apk():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    serve(app, host='0.0.0.0', port=5000)
