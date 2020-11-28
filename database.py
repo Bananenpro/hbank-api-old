@@ -206,6 +206,8 @@ def get_payment_plans(username, username2):
 
 @db_session
 def create_payment_plan(sender_name, receiver_name, amount_str, schedule, description):
+    if sender_name == receiver_name:
+        return False
     try:
         sender = User[sender_name]
         receiver = User[receiver_name]
