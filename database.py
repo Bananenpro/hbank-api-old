@@ -129,9 +129,18 @@ def change_profile_picture_path(username, new_profile_picture_path):
 
 
 @db_session
-def delete_user(name):
+def delete_user(name, password):
     try:
         user = User[name]
+
+        password_db = user.password_hash
+        salt = password_db[:32]
+        password_hash_db = password_db[32:]
+        key = generate_hash(password.encode("utf-8"), salt)
+
+        if key != password_hash_db:
+            return False
+
         log = select(entry for entry in Log if entry.sender_name == name or entry.receiver_name == name)
 
         for entry in log:
