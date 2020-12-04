@@ -190,14 +190,11 @@ def get_profile_picture_id(name):
 
 @app.route("/user/<string:name>", methods=["DELETE"])
 def delete_user(name):
-    body = request.json
     try:
         if not database.verify_auth_token(name, request.headers["Authorization"]):
             return "", 403
-        if database.delete_user(name, body["password"]):
-            return "", 200
-        else:
-            return 403
+        database.delete_user(name)
+        return "", 200
     except KeyError:
         return "", 403
 
