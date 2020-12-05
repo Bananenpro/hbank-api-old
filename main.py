@@ -1,7 +1,7 @@
 import os
 import pytz
 from decimal import Decimal, InvalidOperation
-from gpiozero import CPUTemperature
+from gpiozero import CPUTemperature, LoadAverage, DiskUsage
 
 from datetime import datetime
 
@@ -400,16 +400,29 @@ def apk():
 
 @app.route("/info")
 def info():
-    cpu = CPUTemperature()
-    temperature = str(round(cpu.temperature)) + "°C"
+    temperature = str(round(CPUTemperature().temperature)) + "°C"
+    cpu = str(round(LoadAverage(minutes=1)*100)) + "%"
+    ram_info = get_ram_info()
+    ram = str(round(float(ram_info[1])/float(ram_info[0]))) + "%"
+    disk = DiskUsage().usage + "%"
     return jsonify({
         "payment_plans": True,
         "backups": True,
-        "cpu": "14%",
-        "ram": "34%",
-        "disk": "48%",
+        "cpu": cpu,
+        "ram": ram,
+        "disk": disk,
         "temperature": temperature
     })
+
+
+def get_ram_info():
+    p = os.popen('free')
+    i = 0
+    while 1:
+        i += 1
+        line = p.readline()
+        if i == 2:
+            return line.split()[1:4]
 
 
 if __name__ == "__main__":
