@@ -403,8 +403,8 @@ def info():
     temperature = str(round(CPUTemperature().temperature)) + "°C"
     cpu = str(round(LoadAverage(minutes=1).value*100)) + "%"
     ram_info = get_ram_info()
-    ram = str(round(float(ram_info[1])/float(ram_info[0]))) + "%"
-    disk = str(DiskUsage().usage) + "%"
+    ram = str(float(ram_info[1])/float(ram_info[0])) + "%"
+    disk = str(round(DiskUsage().usage)) + "%"
     return jsonify({
         "payment_plans": True,
         "backups": True,
