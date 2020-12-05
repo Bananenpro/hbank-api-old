@@ -244,7 +244,7 @@ def get_payment_plans(name=""):
                 "schedule": p.schedule,
                 "amount": "+" + str(p.amount) if p.receiver_name == user.name else "-" + str(p.amount),
                 "description": p.desc,
-                "days_left": p.schedule - p.days,
+                "days_left": p.schedule - (datetime.now().date() - p.last_exec.date()).days,
                 "user": p.sender_name if p.receiver_name == user.name else p.receiver_name
             })
         return jsonify(response)
@@ -265,7 +265,7 @@ def get_payment_plan(payment_id):
             "schedule": plan.schedule,
             "amount": "+" + str(plan.amount) if plan.receiver_name == user.name else "-" + str(plan.amount),
             "description": plan.desc,
-            "days_left": plan.schedule - plan.days,
+            "days_left": plan.schedule - (datetime.now().date() - plan.last_exec.date()).days,
             "user": plan.sender_name if plan.receiver_name == user.name else plan.receiver_name
         })
 
