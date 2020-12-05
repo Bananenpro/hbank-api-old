@@ -402,8 +402,8 @@ def apk():
 
 @app.route("/info")
 def info():
-    payment_plans = subprocess.run("systemctl status hbank-payment-plans.timer").returncode == 0
-    backups = subprocess.run("systemctl status hbank-backup.timer").returncode == 0
+    payment_plans = subprocess.run("/usr/bin/systemctl status hbank-payment-plans.timer").returncode == 0
+    backups = subprocess.run("/usr/bin/systemctl status hbank-backup.timer").returncode == 0
     temperature = str(round(CPUTemperature().temperature)) + "°C"
     cpu = str(round(LoadAverage(minutes=1).value*100)) + "%"
     ram_info = get_ram_info()
