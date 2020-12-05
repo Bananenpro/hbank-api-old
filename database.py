@@ -1,12 +1,12 @@
+import hashlib
 import os
 import uuid
-from datetime import datetime, timedelta
-import pytz
-import hashlib
+from datetime import timedelta
 
 from pony.orm import *
-from models import *
+
 from dtos import *
+from models import *
 
 db.bind(provider="sqlite", filename="database.sqlite", create_db=True)
 db.generate_mapping(create_tables=True) 
@@ -37,9 +37,12 @@ def login_user(name, password):
         password_hash_db = password_db[32:]
         key = generate_hash(password.encode("utf-8"), salt)
         if key == password_hash_db:
-            user.auth_token = str(uuid.uuid4())
-            user.token_expiration_date = datetime.now() + timedelta(days=30)
-            return user.auth_token
+            if user.auth_token is not None and user.auth_token != "":
+                return user.auth_token
+            else:
+                user.auth_token = str(uuid.uuid4())
+                user.token_expiration_date = datetime.now() + timedelta(days=30)
+                return user.auth_token
         else:
             return None
     except ObjectNotFound:
