@@ -1,6 +1,7 @@
 import os
 import pytz
 from decimal import Decimal, InvalidOperation
+from gpiozero import CPUTemperature
 
 from datetime import datetime
 
@@ -9,6 +10,7 @@ from waitress import serve
 import database
 import uuid
 from PIL import Image
+
 
 app = Flask(__name__)
 
@@ -398,13 +400,15 @@ def apk():
 
 @app.route("/info")
 def info():
+    cpu = CPUTemperature()
+    temperature = str(round(cpu.temperature)) + "°C"
     return jsonify({
         "payment_plans": True,
         "backups": True,
         "cpu": "14%",
         "ram": "34%",
         "disk": "48%",
-        "temperature": "40°C"
+        "temperature": temperature
     })
 
 
