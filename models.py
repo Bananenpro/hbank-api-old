@@ -19,7 +19,7 @@ class User(db.Entity):
 class PaymentPlan(db.Entity):
     sender_name = orm.Required(str)
     receiver_name = orm.Required(str)
-    last_exec = orm.Required(str)
+    last_exec = orm.Required(datetime)
     schedule = orm.Required(int)
     amount = orm.Required(Decimal)
     desc = orm.Optional(str)

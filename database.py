@@ -249,7 +249,7 @@ def execute_payment_plan(payment_id):
     try:
         pp = PaymentPlan[payment_id]
 
-        while (datetime.now() - pp.last_exec).days >= pp.schedule:
+        while (datetime.now().date() - pp.last_exec.date()).days >= pp.schedule:
             try:
                 sender = User[pp.sender_name]
                 receiver = User[pp.receiver_name]
