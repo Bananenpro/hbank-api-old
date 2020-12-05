@@ -401,7 +401,7 @@ def apk():
 @app.route("/info")
 def info():
     temperature = str(round(CPUTemperature().temperature)) + "°C"
-    cpu = str(round(LoadAverage(minutes=1)*100)) + "%"
+    cpu = str(round(LoadAverage(minutes=1).value*100)) + "%"
     ram_info = get_ram_info()
     ram = str(round(float(ram_info[1])/float(ram_info[0]))) + "%"
     disk = DiskUsage().usage + "%"
