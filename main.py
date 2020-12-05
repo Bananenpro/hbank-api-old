@@ -396,5 +396,17 @@ def apk():
         return "", 500
 
 
+@app.route("/info")
+def info():
+    return jsonify({
+        "payment_plans": True,
+        "backups": True,
+        "cpu": "14%",
+        "ram": "34%",
+        "disk": "48%",
+        "temperature": "40°C"
+    })
+
+
 if __name__ == "__main__":
     serve(app, host='0.0.0.0', port=8080)
