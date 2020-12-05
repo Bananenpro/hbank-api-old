@@ -1,4 +1,6 @@
 import os
+import subprocess
+
 import pytz
 from decimal import Decimal, InvalidOperation
 from gpiozero import CPUTemperature, LoadAverage, DiskUsage
@@ -400,14 +402,16 @@ def apk():
 
 @app.route("/info")
 def info():
+    payment_plans = subprocess.run("systemctl status hbank-payment-plans.timer").returncode == 0
+    backups = subprocess.run("systemctl status hbank-backup.timer").returncode == 0
     temperature = str(round(CPUTemperature().temperature)) + "°C"
     cpu = str(round(LoadAverage(minutes=1).value*100)) + "%"
     ram_info = get_ram_info()
     ram = str(round((float(ram_info[1])/float(ram_info[0]))*100)) + "%"
     disk = str(round(DiskUsage().usage)) + "%"
     return jsonify({
-        "payment_plans": True,
-        "backups": True,
+        "payment_plans": payment_plans,
+        "backups": backups,
         "cpu": cpu,
         "ram": ram,
         "disk": disk,
