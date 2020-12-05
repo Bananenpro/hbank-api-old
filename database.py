@@ -37,7 +37,7 @@ def login_user(name, password):
         password_hash_db = password_db[32:]
         key = generate_hash(password.encode("utf-8"), salt)
         if key == password_hash_db:
-            if user.auth_token is not None and user.auth_token != "" and user.token_expiration_date > datetime.now():
+            if user.auth_token is not None and user.token_expiration_date is not None and user.auth_token != "" and user.token_expiration_date > datetime.now():
                 return user.auth_token
             else:
                 user.auth_token = str(uuid.uuid4())
