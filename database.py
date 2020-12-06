@@ -1,5 +1,5 @@
 import hashlib
-import math
+from dateutil import rrule
 import os
 import uuid
 from datetime import timedelta
@@ -193,7 +193,7 @@ def get_all_payment_plans():
     payments = select(pp for pp in PaymentPlan)
     dtos = []
     for p in payments:
-        dtos.append(PaymentPlanDto(p.id, p.sender_name, p.receiver_name, p.last_exec, p.schedule, p.amount, p.desc))
+        dtos.append(PaymentPlanDto(p.id, p.sender_name, p.receiver_name, p.last_exec, p.schedule, p.schedule_unit, p.amount, p.desc))
     return dtos
 
 
@@ -205,12 +205,12 @@ def get_payment_plans(username, username2):
         payments = select(pp for pp in PaymentPlan if pp.sender_name == username or pp.receiver_name == username)
     dtos = []
     for p in payments:
-        dtos.append(PaymentPlanDto(p.id, p.sender_name, p.receiver_name, p.last_exec, p.schedule, p.amount, p.desc))
+        dtos.append(PaymentPlanDto(p.id, p.sender_name, p.receiver_name, p.last_exec, p.schedule, p.schedule_unit, p.amount, p.desc))
     return dtos
 
 
 @db_session
-def create_payment_plan(sender_name, receiver_name, amount_str, schedule, description):
+def create_payment_plan(sender_name, receiver_name, amount_str, schedule, schedule_unit, description):
     if sender_name == receiver_name:
         return False
     try:
@@ -219,7 +219,7 @@ def create_payment_plan(sender_name, receiver_name, amount_str, schedule, descri
     except ObjectNotFound:
         return False
     amount = round(abs(Decimal(amount_str.replace(",", "."))), 2)
-    PaymentPlan(sender_name=sender_name, receiver_name=receiver_name, last_exec=datetime.now(), schedule=schedule, amount=amount, desc=description)
+    PaymentPlan(sender_name=sender_name, receiver_name=receiver_name, last_exec=datetime.now(), schedule=schedule, schedule_unit=schedule_unit, amount=amount, desc=description)
     return True
 
 
@@ -227,7 +227,7 @@ def create_payment_plan(sender_name, receiver_name, amount_str, schedule, descri
 def get_payment_plan(payment_id):
     try:
         payment = PaymentPlan[payment_id]
-        return PaymentPlanDto(payment_id, payment.sender_name, payment.receiver_name, payment.last_exec, payment.schedule, payment.amount, payment.desc)
+        return PaymentPlanDto(payment_id, payment.sender_name, payment.receiver_name, payment.last_exec, payment.schedule, payment.schedule_unit, payment.amount, payment.desc)
     except ObjectNotFound:
         return None
 
@@ -236,7 +236,7 @@ def get_payment_plan(payment_id):
 def delete_payment_plan(payment_id):
     try:
         payment = PaymentPlan[payment_id]
-        if execute_payment_plan(payment_id, False):
+        if execute_payment_plan(payment_id):
             payment.delete()
             return True
     except ObjectNotFound:
@@ -249,7 +249,7 @@ def execute_payment_plan(payment_id):
     try:
         pp = PaymentPlan[payment_id]
 
-        while (datetime.now().date() - pp.last_exec.date()).days >= pp.schedule:
+        while should_execute(datetime.now(), pp.last_exec, pp.schedule, pp.schedule_unit):
             try:
                 sender = User[pp.sender_name]
                 receiver = User[pp.receiver_name]
@@ -267,6 +267,26 @@ def execute_payment_plan(payment_id):
     except ObjectNotFound:
         return True
     return True
+
+
+def should_execute(now, last_exec, schedule, unit):
+    now = datetime(now.year, now.month, now.day)
+    last_exec = datetime(last_exec.yeare, last_exec.month, last_exec.day)
+    if unit == "years":
+        length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec, until=now, byyearday=1).between(last_exec, now, inc=False))
+        if now.day == 1 and now.month == 1:
+            length += 1
+        return length >= schedule
+    elif unit == "months":
+        length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec, until=now, bymonthday=1).between(last_exec, now, inc=False))
+        if now.day == 1:
+            length += 1
+        return length >= schedule
+    elif unit == "weeks":
+        return (now - last_exec).days >= schedule * 7
+    elif unit == "days":
+        return (now - last_exec).days >= schedule
+    return False
 
 
 # Log

@@ -21,6 +21,7 @@ class PaymentPlan(db.Entity):
     receiver_name = orm.Required(str)
     last_exec = orm.Required(datetime)
     schedule = orm.Required(int)
+    schedule_unit = orm.Required(str)
     amount = orm.Required(Decimal)
     desc = orm.Optional(str)
 

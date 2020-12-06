@@ -8,12 +8,13 @@ class UserDto:
 
 
 class PaymentPlanDto:
-    def __init__(self, payment_id, sender_name, receiver_name, last_exec, schedule, amount, desc):
+    def __init__(self, payment_id, sender_name, receiver_name, last_exec, schedule, schedule_unit, amount, desc):
         self.id = payment_id
         self.sender_name = sender_name
         self.receiver_name = receiver_name
         self.last_exec = last_exec
         self.schedule = schedule
+        self.schedule_unit = schedule_unit
         self.amount = amount
         self.desc = desc
 
