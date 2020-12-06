@@ -286,7 +286,7 @@ def create_payment_plan():
         except InvalidOperation:
             return 400
 
-        if body["amount"].startswith("-") or body["schedule_unit"].startswith("-") or "." in body["schedule"] or "," in body["schedule"]:
+        if body["amount"].startswith("-") or body["schedule_unit"].startswith("-"):
             return 400
 
         user = database.get_user_by_auth_token(request.headers["Authorization"])
