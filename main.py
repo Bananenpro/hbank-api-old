@@ -401,7 +401,7 @@ def apk():
 
 
 def get_cpu_load():
-    return str(os.popen("top -n1 | awk '/Cpu\(s\):/ {print $2}'").readline())
+    return str(os.popen("top -n1 | awk '/Cpu\(s\):/ {print $2}'").readline().strip())
 
 
 @app.route("/info")
