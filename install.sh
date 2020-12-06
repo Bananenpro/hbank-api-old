@@ -12,7 +12,7 @@ sudo raspi-config
 echo Installing updates...
 sudo apt update && sudo apt upgrade
 echo Installing dependencies
-sudo apt install python3-pip python3-dev python3-rpi.gpio rclone git vim libopenjp2-7 libtiff5
+sudo apt install python3-pip python3-dev python3-rpi.gpio rclone git vim htop libopenjp2-7 libtiff5
 echo Rebooting...
 sudo reboot
 
