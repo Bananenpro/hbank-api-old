@@ -405,7 +405,10 @@ def info():
     payment_plans = subprocess.run(["systemctl", "status", "hbank-payment-plans.timer"]).returncode == 0
     backups = subprocess.run(["systemctl", "status", "hbank-backup.timer"]).returncode == 0
     temperature = str(round(CPUTemperature().temperature)) + "°C"
-    cpu = str(round(LoadAverage(minutes=1).value*100)) + "%"
+    load_average = round(LoadAverage(minutes=1).value/4*100)
+    if load_average > 100:
+        load_average = 100
+    cpu = str(load_average) + "%"
     ram_info = get_ram_info()
     ram = str(round((float(ram_info[1])/float(ram_info[0]))*100)) + "%"
     disk = str(round(DiskUsage().usage)) + "%"
