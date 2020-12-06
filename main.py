@@ -4,6 +4,8 @@ import psutil
 
 import pytz
 from decimal import Decimal, InvalidOperation
+
+from dateutil import rrule
 from gpiozero import CPUTemperature, LoadAverage, DiskUsage
 
 from datetime import datetime
@@ -247,12 +249,30 @@ def get_payment_plans(name=""):
                 "schedule": p.schedule,
                 "amount": "+" + str(p.amount) if p.receiver_name == user.name else "-" + str(p.amount),
                 "description": p.desc,
-                "days_left": p.schedule - (datetime.now().date() - p.last_exec.date()).days,
+                "left": left(datetime.now(), p.last_exec, p.schedule, p.schedule_unit),
+                "schedule_unit": p.schedule_unit,
                 "user": p.sender_name if p.receiver_name == user.name else p.receiver_name
             })
         return jsonify(response)
     except KeyError:
         return "", 403
+
+
+def left(now, last_exec, schedule, unit):
+    if unit == "years":
+        length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec, until=now, byyearday=1).between(last_exec, now, inc=False))
+        if now.day == 1 and now.month == 1:
+            length += 1
+        return length
+    elif unit == "months":
+        length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec, until=now, bymonthday=1).between(last_exec, now, inc=False))
+        if now.day == 1:
+            length += 1
+        return length
+    elif unit == "weeks":
+        return int(float((now - last_exec).days) / 7.0)
+    elif unit == "days":
+        return (now - last_exec).days
 
 
 @app.route("/payment_plan/<int:payment_id>")
@@ -268,7 +288,8 @@ def get_payment_plan(payment_id):
             "schedule": plan.schedule,
             "amount": "+" + str(plan.amount) if plan.receiver_name == user.name else "-" + str(plan.amount),
             "description": plan.desc,
-            "days_left": plan.schedule - (datetime.now().date() - plan.last_exec.date()).days,
+            "left": left(datetime.now(), plan.last_exec, plan.schedule, plan.schedule_unit),
+            "schedule_unit": plan.schedule_unit,
             "user": plan.sender_name if plan.receiver_name == user.name else plan.receiver_name
         })
 

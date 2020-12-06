@@ -271,7 +271,7 @@ def execute_payment_plan(payment_id):
 
 def should_execute(now, last_exec, schedule, unit):
     now = datetime(now.year, now.month, now.day)
-    last_exec = datetime(last_exec.yeare, last_exec.month, last_exec.day)
+    last_exec = datetime(last_exec.year, last_exec.month, last_exec.day)
     if unit == "years":
         length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec, until=now, byyearday=1).between(last_exec, now, inc=False))
         if now.day == 1 and now.month == 1:
