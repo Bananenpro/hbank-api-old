@@ -249,7 +249,7 @@ def get_payment_plans(name=""):
                 "schedule": p.schedule,
                 "amount": "+" + str(p.amount) if p.receiver_name == user.name else "-" + str(p.amount),
                 "description": p.desc,
-                "left": left(datetime.now(), p.last_exec, p.schedule_unit),
+                "left": left(datetime.now(), p.last_exec, p.schedule, p.schedule_unit),
                 "schedule_unit": p.schedule_unit,
                 "user": p.sender_name if p.receiver_name == user.name else p.receiver_name
             })
@@ -288,7 +288,7 @@ def get_payment_plan(payment_id):
             "schedule": plan.schedule,
             "amount": "+" + str(plan.amount) if plan.receiver_name == user.name else "-" + str(plan.amount),
             "description": plan.desc,
-            "left": left(datetime.now(), plan.last_exec, plan.schedule_unit),
+            "left": left(datetime.now(), plan.last_exec, plan.schedule, plan.schedule_unit),
             "schedule_unit": plan.schedule_unit,
             "user": plan.sender_name if plan.receiver_name == user.name else plan.receiver_name
         })
