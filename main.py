@@ -249,7 +249,7 @@ def get_payment_plans(name=""):
                 "schedule": p.schedule,
                 "amount": "+" + str(p.amount) if p.receiver_name == user.name else "-" + str(p.amount),
                 "description": p.desc,
-                "left": left(datetime.now(), p.last_exec, p.schedule, p.schedule_unit),
+                "left": left(datetime.now(), p.last_exec, p.schedule_unit),
                 "schedule_unit": p.schedule_unit,
                 "user": p.sender_name if p.receiver_name == user.name else p.receiver_name
             })
@@ -258,7 +258,8 @@ def get_payment_plans(name=""):
         return "", 403
 
 
-def left(now, last_exec, schedule, unit):
+def left(now, last_exec, unit):
+    print("unit", unit)
     if unit == "years":
         length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec, until=now, byyearday=1).between(last_exec, now, inc=False))
         if now.day == 1 and now.month == 1:
@@ -272,6 +273,7 @@ def left(now, last_exec, schedule, unit):
     elif unit == "weeks":
         return int(float((now - last_exec).days) / 7.0)
     elif unit == "days":
+        print("left", (now - last_exec).days)
         return (now - last_exec).days
 
 
@@ -288,7 +290,7 @@ def get_payment_plan(payment_id):
             "schedule": plan.schedule,
             "amount": "+" + str(plan.amount) if plan.receiver_name == user.name else "-" + str(plan.amount),
             "description": plan.desc,
-            "left": left(datetime.now(), plan.last_exec, plan.schedule, plan.schedule_unit),
+            "left": left(datetime.now(), plan.last_exec, plan.schedule_unit),
             "schedule_unit": plan.schedule_unit,
             "user": plan.sender_name if plan.receiver_name == user.name else plan.receiver_name
         })
