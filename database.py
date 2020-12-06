@@ -1,5 +1,6 @@
 import hashlib
 from dateutil import rrule
+from dateutil.relativedelta import relativedelta
 import os
 import uuid
 from datetime import timedelta
@@ -257,7 +258,14 @@ def execute_payment_plan(payment_id):
                     sender.balance -= pp.amount
                     receiver.balance += pp.amount
                     create_log_entry(sender.name, receiver.name, pp.amount, sender.balance, receiver.balance, datetime.now(), pp.desc)
-                    pp.last_exec += timedelta(days=pp.schedule)
+                    if pp.schedule_unit == "days":
+                        pp.last_exec += relativedelta(days=pp.schedule)
+                    elif pp.schedule_unit == "weeks":
+                        pp.last_exec += relativedelta(weeks=pp.schedule)
+                    elif pp.schedule_unit == "months":
+                        pp.last_exec += relativedelta(months=pp.schedule)
+                    elif pp.schedule_unit == "years":
+                        pp.last_exec += relativedelta(years=pp.schedule)
                 else:
                     return False
             except ObjectNotFound:
