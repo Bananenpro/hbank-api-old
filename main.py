@@ -258,23 +258,21 @@ def get_payment_plans(name=""):
         return "", 403
 
 
-def left(now, last_exec, unit):
-    print("unit", unit)
+def left(now, last_exec, schedule, unit):
     if unit == "years":
         length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec, until=now, byyearday=1).between(last_exec, now, inc=False))
         if now.day == 1 and now.month == 1:
             length += 1
-        return length
+        return schedule - length
     elif unit == "months":
         length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec, until=now, bymonthday=1).between(last_exec, now, inc=False))
         if now.day == 1:
             length += 1
-        return length
+        return schedule - length
     elif unit == "weeks":
-        return int(float((now - last_exec).days) / 7.0)
+        return schedule - int(float((now - last_exec).days) / 7.0)
     elif unit == "days":
-        print("left", (now - last_exec).days)
-        return (now - last_exec).days
+        return schedule - (now - last_exec).days
 
 
 @app.route("/payment_plan/<int:payment_id>")
