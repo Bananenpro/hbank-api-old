@@ -409,13 +409,14 @@ def info():
     payment_plans = subprocess.run(["systemctl", "status", "hbank-payment-plans.timer"]).returncode == 0
     backups = subprocess.run(["systemctl", "status", "hbank-backup.timer"]).returncode == 0
     temperature = str(round(CPUTemperature().temperature)) + "°C"
+    cpu = str(round(float(get_cpu_load().replace(",", ".")))) + "%"
     ram_info = get_ram_info()
     ram = str(round((float(ram_info[1])/float(ram_info[0]))*100)) + "%"
     disk = str(round(DiskUsage().usage)) + "%"
     return jsonify({
         "payment_plans": payment_plans,
         "backups": backups,
-        "cpu": get_cpu_load(),
+        "cpu": cpu,
         "ram": ram,
         "disk": disk,
         "temperature": temperature
