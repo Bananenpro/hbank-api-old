@@ -1,5 +1,6 @@
 import os
 import subprocess
+import psutil
 
 import pytz
 from decimal import Decimal, InvalidOperation
@@ -400,17 +401,12 @@ def apk():
         return "", 500
 
 
-def get_cpu_load():
-    return float(str(os.popen("top -n1 | awk '/Cpu\(s\):/ {print $2}'").readline().strip().replace(",",".")))
-
-
-
 @app.route("/info")
 def info():
     payment_plans = subprocess.run(["systemctl", "status", "hbank-payment-plans.timer"]).returncode == 0
     backups = subprocess.run(["systemctl", "status", "hbank-backup.timer"]).returncode == 0
     temperature = str(round(CPUTemperature().temperature)) + "°C"
-    cpu = str(round(get_cpu_load())) + "%"
+    cpu = str(round(psutil.cpu_percent(interval=0.5))) + "%"
     ram_info = get_ram_info()
     ram = str(round((float(ram_info[1])/float(ram_info[0]))*100)) + "%"
     disk = str(round(DiskUsage().usage)) + "%"

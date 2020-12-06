@@ -9,7 +9,7 @@ mkdir app
 mkdir app/android
 echo "10" > app/android/version
 echo Installing dependencies...
-pip3 install Flask pony Pillow pytz waitress gpiozero
+pip3 install Flask pony Pillow pytz waitress gpiozero psutil
 echo Setting up system services...
 sudo cp system/hbank.service /etc/systemd/system/
 sudo systemctl enable hbank.service
