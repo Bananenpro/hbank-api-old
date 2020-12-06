@@ -400,19 +400,22 @@ def apk():
         return "", 500
 
 
+def get_cpu_load():
+    return str(os.popen("top -n1 | awk '/Cpu\(s\):/ {print $2}'").readline())
+
+
 @app.route("/info")
 def info():
     payment_plans = subprocess.run(["systemctl", "status", "hbank-payment-plans.timer"]).returncode == 0
     backups = subprocess.run(["systemctl", "status", "hbank-backup.timer"]).returncode == 0
     temperature = str(round(CPUTemperature().temperature)) + "°C"
-    cpu = str(round(LoadAverage(minutes=1).load_average*100)) + "%"
     ram_info = get_ram_info()
     ram = str(round((float(ram_info[1])/float(ram_info[0]))*100)) + "%"
     disk = str(round(DiskUsage().usage)) + "%"
     return jsonify({
         "payment_plans": payment_plans,
         "backups": backups,
-        "cpu": cpu,
+        "cpu": get_cpu_load(),
         "ram": ram,
         "disk": disk,
         "temperature": temperature
