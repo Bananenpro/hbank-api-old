@@ -25,7 +25,7 @@ def create_user(name, password, is_parent):
     key = generate_hash(password.encode("utf-8"), salt)
 
     password_hash = salt + key
-    User(name=name, password_hash=password_hash, profile_picture_id=0, is_parent=is_parent, balance=1000 if is_parent else 0)
+    User(name=name, password_hash=password_hash, profile_picture_id=0, is_parent=is_parent, balance=5000 if is_parent else 0)
 
 
 @db_session
