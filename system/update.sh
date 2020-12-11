@@ -1,6 +1,6 @@
 #!/bin/bash
-./backup.sh
 cd ~/h-bank
+./system/backup.sh
 echo Updating...
 git pull
 echo Restarting...
