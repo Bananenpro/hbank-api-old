@@ -1,4 +1,5 @@
 #!/bin/bash
+./backup.sh
 cd ~/h-bank
 echo Updating...
 git pull
