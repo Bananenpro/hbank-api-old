@@ -278,22 +278,23 @@ def execute_payment_plan(payment_id):
 
 
 def should_execute(now, last_exec, schedule, unit):
-    now = datetime(now.year, now.month, now.day)
-    last_exec = datetime(last_exec.year, last_exec.month, last_exec.day)
-    if unit == "years":
-        length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec, until=now, byyearday=1).between(last_exec, now, inc=False))
-        if now.day == 1 and now.month == 1:
-            length += 1
-        return length >= schedule
-    elif unit == "months":
-        length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec, until=now, bymonthday=1).between(last_exec, now, inc=False))
-        if now.day == 1:
-            length += 1
-        return length >= schedule
-    elif unit == "weeks":
-        return (now - last_exec).days >= schedule * 7
-    elif unit == "days":
-        return (now - last_exec).days >= schedule
+    now_date = datetime(now.year, now.month, now.day)
+    last_exec_date = datetime(last_exec.year, last_exec.month, last_exec.day)
+    if now_date > last_exec_date:
+        if unit == "years":
+            length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec_date, until=now_date, byyearday=1).between(last_exec_date, now_date, inc=False))
+            if now_date.day == 1 and now_date.month == 1:
+                length += 1
+            return length >= schedule
+        elif unit == "months":
+            length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec_date, until=now_date, bymonthday=1).between(last_exec_date, now_date, inc=False))
+            if now_date.day == 1:
+                length += 1
+            return length >= schedule
+        elif unit == "weeks":
+            return (now_date - last_exec_date).days >= schedule * 7
+        elif unit == "days":
+            return (now_date - last_exec_date).days >= schedule
     return False
 
 
