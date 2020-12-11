@@ -1,5 +1,7 @@
 #!/bin/bash
 cd ~
+echo Creating backup...
+./h-bank/system/backup.sh
 echo Stopping system services...
 sudo systemctl stop hbank.service
 sudo systemctl stop hbank-backup.timer
