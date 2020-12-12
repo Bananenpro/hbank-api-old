@@ -303,7 +303,7 @@ def get_payment_plan(payment_id):
         if user is None or plan is None or (plan.sender_name != user.name and plan.receiver_name != user.name):
             return "", 403
 
-        left_unit_var = left_unit(datetime.now(), p.last_exec, p.schedule)
+        left_unit_var = left_unit(datetime.now(), plan.last_exec, plan.schedule)
         return jsonify({
             "id": payment_id,
             "schedule": plan.schedule,
