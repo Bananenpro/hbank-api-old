@@ -5,7 +5,7 @@ import psutil
 import pytz
 from decimal import Decimal, InvalidOperation
 
-from dateutil import rrule
+import math
 from gpiozero import CPUTemperature, DiskUsage
 
 from datetime import datetime
@@ -309,13 +309,21 @@ def left(now, last_exec, schedule, unit, schedule_unit):
 
     if next_date is not None:
         if unit == "years":
-            return relativedelta(next_date, now_date).years
+            delta = relativedelta(next_date, now_date)
+            years = delta.years
+            if delta.months > 0 or delta.weeks > 0 or delta.days > 0:
+                years += 1
+            return years
         elif unit == "months":
-            return relativedelta(next_date, now_date).months
+            delta = relativedelta(next_date, now_date)
+            months = delta.months + delta.years * 12
+            if delta.weeks > 0 or delta.days > 0:
+                months += 1
+            return months
         elif unit == "weeks":
-            return relativedelta(next_date, now_date).weeks
+            return int(math.ceil((next_date - now_date).days / 7.0))
         elif unit == "days":
-            return relativedelta(next_date, now_date).days
+            return (next_date - now_date).days
     return schedule
 
 
