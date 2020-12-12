@@ -276,9 +276,9 @@ def left_unit(now, last_exec, schedule, schedule_unit):
     elif schedule_unit == "days":
         next_date = last_exec_date + relativedelta(days=schedule)
 
-    left_years = relativedelta(now_date, next_date).years
-    left_months = relativedelta(now_date, next_date).months
-    left_weeks = relativedelta(now_date, next_date).weeks
+    left_years = relativedelta(next_date, now_date).years
+    left_months = relativedelta(next_date, now_date).months
+    left_weeks = relativedelta(next_date, now_date).weeks
 
     if left_years != 0:
         return "years"
@@ -309,13 +309,13 @@ def left(now, last_exec, schedule, unit, schedule_unit):
 
     if next_date is not None:
         if unit == "years":
-            return relativedelta(now_date, next_date).years
+            return relativedelta(next_date, now_date).years
         elif unit == "months":
-            return relativedelta(now_date, next_date).months
+            return relativedelta(next_date, now_date).months
         elif unit == "weeks":
-            return relativedelta(now_date, next_date).weeks
+            return relativedelta(next_date, now_date).weeks
         elif unit == "days":
-            return relativedelta(now_date, next_date).days
+            return relativedelta(next_date, now_date).days
     return schedule
 
 
