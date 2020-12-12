@@ -6,9 +6,10 @@ import pytz
 from decimal import Decimal, InvalidOperation
 
 from dateutil import rrule
-from gpiozero import CPUTemperature, LoadAverage, DiskUsage
+from gpiozero import CPUTemperature, DiskUsage
 
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from flask import Flask, jsonify, request, send_file
 from waitress import serve
@@ -244,13 +245,13 @@ def get_payment_plans(name=""):
             return "", 403
         payments = database.get_payment_plans(user.name, name)
         for p in payments:
-            left_unit_var = left_unit(datetime.now(), p.last_exec, p.schedule)
+            left_unit_var = left_unit(datetime.now(), p.last_exec, p.schedule, p.schedule_unit)
             response.append({
                 "id": p.id,
                 "schedule": p.schedule,
                 "amount": "+" + str(p.amount) if p.receiver_name == user.name else "-" + str(p.amount),
                 "description": p.desc,
-                "left": left(datetime.now(), p.last_exec, p.schedule, left_unit_var),
+                "left": left(datetime.now(), p.last_exec, p.schedule, left_unit_var, p.schedule_unit),
                 "left_unit": left_unit_var,
                 "schedule_unit": p.schedule_unit,
                 "user": p.sender_name if p.receiver_name == user.name else p.receiver_name
@@ -260,38 +261,60 @@ def get_payment_plans(name=""):
         return "", 403
 
 
-def left_unit(now, last_exec, schedule):
+def left_unit(now, last_exec, schedule, schedule_unit):
     now_date = datetime(now.year, now.month, now.day)
     last_exec_date = datetime(last_exec.year, last_exec.month, last_exec.day)
 
-    left_years = schedule - len(rrule.rrule(rrule.YEARLY, dtstart=last_exec_date, until=now_date, byyearday=1).between(last_exec_date, now_date, inc=True))
+    next_date = None
+
+    if schedule_unit == "years":
+        next_date = last_exec_date + relativedelta(years=schedule)
+    elif schedule_unit == "months":
+        next_date = last_exec_date + relativedelta(months=schedule)
+    elif schedule_unit == "weeks":
+        next_date = last_exec_date + relativedelta(weeks=schedule)
+    elif schedule_unit == "days":
+        next_date = last_exec_date + relativedelta(days=schedule)
+
+    left_years = next_date.year - now_date.year
     if left_years > 1:
         return "years"
 
-    left_month = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec_date, until=now_date, bymonthday=1).between(last_exec_date, now_date, inc=True))
+    left_month = next_date.month - now_date.month
     if left_month > 1:
         return "months"
 
-    left_weeks = schedule - int(float((now_date - last_exec_date).days) / 7.0)
+    left_weeks = int((next_date - now_date).days / 7.0)
     if left_weeks > 1:
         return "weeks"
 
     return "days"
 
 
-def left(now, last_exec, schedule, unit):
+def left(now, last_exec, schedule, unit, schedule_unit):
     now_date = datetime(now.year, now.month, now.day)
     last_exec_date = datetime(last_exec.year, last_exec.month, last_exec.day)
-    if unit == "years":
-        length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec_date, until=now_date, byyearday=1).between(last_exec_date, now_date, inc=True))
-        return schedule - length
-    elif unit == "months":
-        length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec_date, until=now_date, bymonthday=1).between(last_exec_date, now_date, inc=True))
-        return schedule - length
-    elif unit == "weeks":
-        return schedule - int(float((now_date - last_exec_date).days) / 7.0)
-    elif unit == "days":
-        return schedule - (now_date - last_exec_date).days
+
+    next_date = None
+
+    if schedule_unit == "years":
+        next_date = last_exec_date + relativedelta(years=schedule)
+    elif schedule_unit == "months":
+        next_date = last_exec_date + relativedelta(months=schedule)
+    elif schedule_unit == "weeks":
+        next_date = last_exec_date + relativedelta(weeks=schedule)
+    elif schedule_unit == "days":
+        next_date = last_exec_date + relativedelta(days=schedule)
+
+    if next_date is not None:
+        if unit == "years":
+            return next_date.year - now_date.year
+        elif unit == "months":
+            return next_date.month - now_date.month
+        elif unit == "weeks":
+            return int((next_date - now_date).days / 7.0)
+        elif unit == "days":
+            return (next_date - now_date).days
     return schedule
 
 
@@ -303,13 +326,13 @@ def get_payment_plan(payment_id):
         if user is None or plan is None or (plan.sender_name != user.name and plan.receiver_name != user.name):
             return "", 403
 
-        left_unit_var = left_unit(datetime.now(), plan.last_exec, plan.schedule)
+        left_unit_var = left_unit(datetime.now(), plan.last_exec, plan.schedule, plan.schedule_unit)
         return jsonify({
             "id": payment_id,
             "schedule": plan.schedule,
             "amount": "+" + str(plan.amount) if plan.receiver_name == user.name else "-" + str(plan.amount),
             "description": plan.desc,
-            "left": left(datetime.now(), plan.last_exec, plan.schedule, left_unit_var),
+            "left": left(datetime.now(), plan.last_exec, plan.schedule, left_unit_var, plan.schedule_unit),
             "left_unit": left_unit_var,
             "schedule_unit": plan.schedule_unit,
             "user": plan.sender_name if plan.receiver_name == user.name else plan.receiver_name

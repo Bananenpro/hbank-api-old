@@ -1,5 +1,4 @@
 import hashlib
-from dateutil import rrule
 from dateutil.relativedelta import relativedelta
 import os
 import uuid
@@ -220,7 +219,14 @@ def create_payment_plan(sender_name, receiver_name, amount_str, schedule, schedu
     except ObjectNotFound:
         return False
     amount = round(abs(Decimal(amount_str.replace(",", "."))), 2)
-    PaymentPlan(sender_name=sender_name, receiver_name=receiver_name, last_exec=datetime.now(), schedule=schedule, schedule_unit=schedule_unit, amount=amount, desc=description)
+
+    last_exec = datetime.now()
+    if schedule_unit == "years":
+        last_exec = datetime(last_exec.year, 1, 1, last_exec.hour, last_exec.minute, last_exec.second, last_exec.microsecond)
+    elif schedule_unit == "months":
+        last_exec = datetime(last_exec.year, last_exec.month, 1, last_exec.hour, last_exec.minute, last_exec.second, last_exec.microsecond)
+
+    PaymentPlan(sender_name=sender_name, receiver_name=receiver_name, last_exec=last_exec, schedule=schedule, schedule_unit=schedule_unit, amount=amount, desc=description)
     return True
 
 
@@ -282,15 +288,13 @@ def should_execute(now, last_exec, schedule, unit):
     last_exec_date = datetime(last_exec.year, last_exec.month, last_exec.day)
     if now_date > last_exec_date:
         if unit == "years":
-            length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec_date, until=now_date, byyearday=1).between(last_exec_date, now_date, inc=True))
-            return length >= schedule
+            return now_date >= last_exec_date + relativedelta(years=schedule)
         elif unit == "months":
-            length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec_date, until=now_date, bymonthday=1).between(last_exec_date, now_date, inc=True))
-            return length >= schedule
+            return now_date >= last_exec_date + relativedelta(months=schedule)
         elif unit == "weeks":
-            return (now_date - last_exec_date).days >= schedule * 7
+            return now_date >= last_exec_date + relativedelta(weeks=schedule)
         elif unit == "days":
-            return (now_date - last_exec_date).days >= schedule
+            return now_date >= last_exec_date + relativedelta(days=schedule)
     return False
 
 
