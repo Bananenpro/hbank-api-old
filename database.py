@@ -282,14 +282,10 @@ def should_execute(now, last_exec, schedule, unit):
     last_exec_date = datetime(last_exec.year, last_exec.month, last_exec.day)
     if now_date > last_exec_date:
         if unit == "years":
-            length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec_date, until=now_date, byyearday=1).between(last_exec_date, now_date, inc=False))
-            if now_date.day == 1 and now_date.month == 1:
-                length += 1
+            length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec_date, until=now_date, byyearday=1).between(last_exec_date, now_date, inc=True))
             return length >= schedule
         elif unit == "months":
-            length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec_date, until=now_date, bymonthday=1).between(last_exec_date, now_date, inc=False))
-            if now_date.day == 1:
-                length += 1
+            length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec_date, until=now_date, bymonthday=1).between(last_exec_date, now_date, inc=True))
             return length >= schedule
         elif unit == "weeks":
             return (now_date - last_exec_date).days >= schedule * 7
