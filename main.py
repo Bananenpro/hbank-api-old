@@ -244,12 +244,14 @@ def get_payment_plans(name=""):
             return "", 403
         payments = database.get_payment_plans(user.name, name)
         for p in payments:
+            left_unit_var = left_unit(datetime.now(), p.last_exec, p.schedule)
             response.append({
                 "id": p.id,
                 "schedule": p.schedule,
                 "amount": "+" + str(p.amount) if p.receiver_name == user.name else "-" + str(p.amount),
                 "description": p.desc,
-                "left": left(datetime.now(), p.last_exec, p.schedule, p.schedule_unit),
+                "left": left(datetime.now(), p.last_exec, p.schedule, left_unit_var),
+                "left_unit": left_unit_var,
                 "schedule_unit": p.schedule_unit,
                 "user": p.sender_name if p.receiver_name == user.name else p.receiver_name
             })
@@ -258,23 +260,39 @@ def get_payment_plans(name=""):
         return "", 403
 
 
+def left_unit(now, last_exec, schedule):
+    now_date = datetime(now.year, now.month, now.day)
+    last_exec_date = datetime(last_exec.year, last_exec.month, last_exec.day)
+
+    left_years = schedule - len(rrule.rrule(rrule.YEARLY, dtstart=last_exec_date, until=now_date, byyearday=1).between(last_exec_date, now_date, inc=True))
+    if left_years > 1:
+        return "years"
+
+    left_month = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec_date, until=now_date, bymonthday=1).between(last_exec_date, now_date, inc=True))
+    if left_month > 1:
+        return "months"
+
+    left_weeks = schedule - int(float((now_date - last_exec_date).days) / 7.0)
+    if left_weeks > 1:
+        return "weeks"
+
+    return "days"
+
+
 def left(now, last_exec, schedule, unit):
-    now = datetime(now.year, now.month, now.day)
-    last_exec = datetime(last_exec.year, last_exec.month, last_exec.day)
+    now_date = datetime(now.year, now.month, now.day)
+    last_exec_date = datetime(last_exec.year, last_exec.month, last_exec.day)
     if unit == "years":
-        length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec, until=now, byyearday=1).between(last_exec, now, inc=False))
-        if now.day == 1 and now.month == 1:
-            length += 1
+        length = len(rrule.rrule(rrule.YEARLY, dtstart=last_exec_date, until=now_date, byyearday=1).between(last_exec_date, now_date, inc=True))
         return schedule - length
     elif unit == "months":
-        length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec, until=now, bymonthday=1).between(last_exec, now, inc=False))
-        if now.day == 1:
-            length += 1
+        length = len(rrule.rrule(rrule.MONTHLY, dtstart=last_exec_date, until=now_date, bymonthday=1).between(last_exec_date, now_date, inc=True))
         return schedule - length
     elif unit == "weeks":
-        return schedule - int(float((now - last_exec).days) / 7.0)
+        return schedule - int(float((now_date - last_exec_date).days) / 7.0)
     elif unit == "days":
-        return schedule - (now - last_exec).days
+        return schedule - (now_date - last_exec_date).days
+    return schedule
 
 
 @app.route("/payment_plan/<int:payment_id>")
@@ -285,12 +303,14 @@ def get_payment_plan(payment_id):
         if user is None or plan is None or (plan.sender_name != user.name and plan.receiver_name != user.name):
             return "", 403
 
+        left_unit_var = left_unit(datetime.now(), p.last_exec, p.schedule)
         return jsonify({
             "id": payment_id,
             "schedule": plan.schedule,
             "amount": "+" + str(plan.amount) if plan.receiver_name == user.name else "-" + str(plan.amount),
             "description": plan.desc,
-            "left": left(datetime.now(), plan.last_exec, plan.schedule, plan.schedule_unit),
+            "left": left(datetime.now(), plan.last_exec, plan.schedule, left_unit_var),
+            "left_unit": left_unit_var,
             "schedule_unit": plan.schedule_unit,
             "user": plan.sender_name if plan.receiver_name == user.name else plan.receiver_name
         })
