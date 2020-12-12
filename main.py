@@ -280,13 +280,13 @@ def left_unit(now, last_exec, schedule, schedule_unit):
     left_months = relativedelta(next_date, now_date).months
     left_weeks = relativedelta(next_date, now_date).weeks
 
-    if left_years != 0:
+    if left_years != 0 and schedule_unit == "years":
         return "years"
 
-    if left_months != 0:
+    if left_months != 0 and (schedule_unit == "years" or schedule_unit == "months"):
         return "months"
 
-    if left_weeks != 0:
+    if left_weeks != 0 and schedule_unit != "days":
         return "weeks"
 
     return "days"
