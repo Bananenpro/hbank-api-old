@@ -126,7 +126,8 @@ def change_profile_picture_path(username, new_profile_picture_path):
         if user.profile_picture is not None and os.path.isfile(user.profile_picture):
             os.remove(user.profile_picture)
 
-        user.profile_picture_id += 1
+        if new_profile_picture_path != "":
+            user.profile_picture_id += 1
         user.profile_picture = new_profile_picture_path
     except ObjectNotFound:
         return
