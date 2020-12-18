@@ -246,11 +246,14 @@ def get_payment_plans(name=""):
         payments = database.get_payment_plans(user.name, name)
         for p in payments:
             left_unit_var = left_unit(datetime.now(), p.last_exec, p.schedule, p.schedule_unit)
+            next_str = next_exec(p.last_exec, p.schedule, p.schedule_unit).astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y")
+            next_str = next_str[:-4]+next_str[-2:]
             response.append({
                 "id": p.id,
                 "schedule": p.schedule,
                 "amount": "+" + str(p.amount) if p.receiver_name == user.name else "-" + str(p.amount),
                 "description": p.desc,
+                "next": next_str,
                 "left": left(datetime.now(), p.last_exec, p.schedule, left_unit_var, p.schedule_unit),
                 "left_unit": left_unit_var,
                 "schedule_unit": p.schedule_unit,
@@ -261,20 +264,22 @@ def get_payment_plans(name=""):
         return "", 403
 
 
+def next_exec(last_exec, schedule, schedule_unit):
+    last_exec_date = datetime(last_exec.year, last_exec.month, last_exec.day)
+    if schedule_unit == "years":
+        return last_exec_date + relativedelta(years=schedule)
+    elif schedule_unit == "months":
+        return last_exec_date + relativedelta(months=schedule)
+    elif schedule_unit == "weeks":
+        return last_exec_date + relativedelta(weeks=schedule)
+    elif schedule_unit == "days":
+        return last_exec_date + relativedelta(days=schedule)
+    
+
 def left_unit(now, last_exec, schedule, schedule_unit):
     now_date = datetime(now.year, now.month, now.day)
-    last_exec_date = datetime(last_exec.year, last_exec.month, last_exec.day)
 
-    next_date = None
-
-    if schedule_unit == "years":
-        next_date = last_exec_date + relativedelta(years=schedule)
-    elif schedule_unit == "months":
-        next_date = last_exec_date + relativedelta(months=schedule)
-    elif schedule_unit == "weeks":
-        next_date = last_exec_date + relativedelta(weeks=schedule)
-    elif schedule_unit == "days":
-        next_date = last_exec_date + relativedelta(days=schedule)
+    next_date = next_exec(last_exec, schedule, schedule_unit)
 
     delta = relativedelta(next_date, now_date)
     left_years = delta.years
@@ -339,11 +344,14 @@ def get_payment_plan(payment_id):
             return "", 403
 
         left_unit_var = left_unit(datetime.now(), plan.last_exec, plan.schedule, plan.schedule_unit)
+        next_str = next_exec(plan.last_exec, plan.schedule, plan.schedule_unit).astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y")
+        next_str = next_str[:-4]+next_str[-2:]
         return jsonify({
             "id": payment_id,
             "schedule": plan.schedule,
             "amount": "+" + str(plan.amount) if plan.receiver_name == user.name else "-" + str(plan.amount),
             "description": plan.desc,
+            "next": next_str,
             "left": left(datetime.now(), plan.last_exec, plan.schedule, left_unit_var, plan.schedule_unit),
             "left_unit": left_unit_var,
             "schedule_unit": plan.schedule_unit,
