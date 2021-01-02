@@ -274,7 +274,7 @@ def next_exec(last_exec, schedule, schedule_unit):
         return last_exec_date + relativedelta(weeks=schedule)
     elif schedule_unit == "days":
         return last_exec_date + relativedelta(days=schedule)
-    
+
 
 def left_unit(now, last_exec, schedule, schedule_unit):
     now_date = datetime(now.year, now.month, now.day)
@@ -286,15 +286,15 @@ def left_unit(now, last_exec, schedule, schedule_unit):
 
     left_months = delta.months + delta.years * 12
 
-    left_weeks = int(math.floor((next_date - now_date).days / 7.0))
+    left_weeks = int(math.ceil((next_date - now_date).days / 7.0))
 
-    if left_years != 0 and schedule_unit == "years":
+    if left_years >= 0 and schedule_unit == "years":
         return "years"
 
-    if (left_months != 0 and (schedule_unit == "years" or schedule_unit == "months")) or (schedule_unit == "months" and left_months == 0 and left_weeks == 5):
+    if (left_months >= 0 and (schedule_unit == "years" or schedule_unit == "months")) or (schedule_unit == "months" and left_months == 0 and left_weeks == 5):
         return "months"
 
-    if left_weeks != 0 and schedule_unit != "days":
+    if left_weeks >= 0 and schedule_unit != "days":
         return "weeks"
 
     return "days"
