@@ -288,13 +288,13 @@ def left_unit(now, last_exec, schedule, schedule_unit):
 
     left_weeks = int(math.ceil((next_date - now_date).days / 7.0))
 
-    if left_years >= 0 and schedule_unit == "years":
+    if left_years > 0 and schedule_unit == "years":
         return "years"
 
-    if (left_months >= 0 and (schedule_unit == "years" or schedule_unit == "months")) or (schedule_unit == "months" and left_months == 0 and left_weeks == 5):
+    if (left_months > 0 and (schedule_unit == "years" or schedule_unit == "months")) or (schedule_unit == "months" and left_months == 0 and left_weeks == 5):
         return "months"
 
-    if left_weeks >= 0 and schedule_unit != "days":
+    if left_weeks > 0 and schedule_unit != "days":
         return "weeks"
 
     return "days"
