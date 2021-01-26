@@ -516,8 +516,6 @@ def version():
 
 @app.route("/apk")
 def apk():
-    if not server_password():
-        return "", 403
     try:
         return send_file("app/android/h-bank.apk")
     except Exception:
