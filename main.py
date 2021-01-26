@@ -576,5 +576,4 @@ if __name__ == "__main__":
     file.close()
     if PASSWORD is None or len(PASSWORD.strip("\r").strip("\n").strip()) == 0:
         PASSWORD = "password"
-    print(PASSWORD)
     serve(app, host='0.0.0.0', port=8080)
