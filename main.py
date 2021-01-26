@@ -513,6 +513,7 @@ def version():
         "version": int(app_version)
     })
 
+
 @app.route("/apk")
 def apk():
     if not server_password():
@@ -542,6 +543,14 @@ def info():
         "disk": disk,
         "temperature": temperature
     })
+
+
+@app.route("connect")
+def connect():
+    if not server_password():
+        return "", 403
+    else:
+        return "", 200
 
 
 def get_ram_info():
