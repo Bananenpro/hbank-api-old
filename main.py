@@ -565,7 +565,7 @@ def get_ram_info():
 
 def server_password():
     try:
-        return request.headers["Password"] == 1234
+        return request.headers["Password"] == PASSWORD
     except KeyError:
         return False
 
