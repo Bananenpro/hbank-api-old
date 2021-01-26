@@ -138,8 +138,6 @@ def logout():
 
 @app.route("/profile_picture", methods=["POST"])
 def change_profile_picture():
-    if not server_password():
-        return "", 403
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
 
@@ -181,8 +179,6 @@ def resize(filepath, target_size):
 
 @app.route("/profile_picture/<string:name>")
 def get_profile_picture(name):
-    if not server_password():
-        return "", 403
     try:
         user = database.get_user(name)
 
@@ -201,8 +197,6 @@ def get_profile_picture(name):
 
 @app.route("/profile_picture_id/<string:name>")
 def get_profile_picture_id(name):
-    if not server_password():
-        return "", 403
     user = database.get_user(name)
 
     if user is None:
