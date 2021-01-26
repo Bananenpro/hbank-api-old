@@ -563,7 +563,7 @@ def get_ram_info():
 
 def server_password():
     try:
-        return request.headers["Password"] == PASSWORD
+        return request.headers["Password"].strip() == PASSWORD.strip("\r").strip("\n").strip()
     except KeyError:
         return False
 
