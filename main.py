@@ -545,7 +545,7 @@ def info():
     })
 
 
-@app.route("connect")
+@app.route("/connect")
 def connect():
     if not server_password():
         return "", 403
