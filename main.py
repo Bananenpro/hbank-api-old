@@ -22,10 +22,13 @@ app = Flask(__name__)
 
 profile_picture_directory = 'uploads/profile_pictures/'
 TIMEZONE = "Europe/Berlin"
+PASSWORD = ""
 
 
 @app.route("/user")
 def get_users():
+    if not server_password():
+        return "", 403
     users = database.get_users()
     response = []
     for u in users:
@@ -38,6 +41,8 @@ def get_users():
 
 @app.route("/user/<string:name>")
 def get_user(name):
+    if not server_password():
+        return "", 403
     user = database.get_user(name)
     if user is None:
         return "", 404
@@ -65,6 +70,8 @@ def get_user(name):
 
 @app.route("/register", methods=["POST"])
 def register():
+    if not server_password():
+        return "", 403
     body = request.json
     try:
         name_length = False
@@ -98,6 +105,8 @@ def register():
 
 @app.route("/login", methods=["POST"])
 def login():
+    if not server_password():
+        return "", 403
     body = request.json
     try:
         token = database.login_user(body["name"], body["password"])
@@ -114,6 +123,8 @@ def login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
+    if not server_password():
+        return "", 403
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
@@ -127,6 +138,8 @@ def logout():
 
 @app.route("/profile_picture", methods=["POST"])
 def change_profile_picture():
+    if not server_password():
+        return "", 403
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
 
@@ -168,6 +181,8 @@ def resize(filepath, target_size):
 
 @app.route("/profile_picture/<string:name>")
 def get_profile_picture(name):
+    if not server_password():
+        return "", 403
     try:
         user = database.get_user(name)
 
@@ -186,6 +201,8 @@ def get_profile_picture(name):
 
 @app.route("/profile_picture_id/<string:name>")
 def get_profile_picture_id(name):
+    if not server_password():
+        return "", 403
     user = database.get_user(name)
 
     if user is None:
@@ -198,6 +215,8 @@ def get_profile_picture_id(name):
 
 @app.route("/user/<string:name>", methods=["DELETE"])
 def delete_user(name):
+    if not server_password():
+        return "", 403
     try:
         if not database.verify_auth_token(name, request.headers["Authorization"]):
             return "", 403
@@ -209,6 +228,8 @@ def delete_user(name):
 
 @app.route("/transaction", methods=["POST"])
 def transfer_money():
+    if not server_password():
+        return "", 403
     body = request.json
     try:
 
@@ -238,6 +259,8 @@ def transfer_money():
 @app.route("/payment_plans/")
 @app.route("/payment_plans/<string:name>")
 def get_payment_plans(name=""):
+    if not server_password():
+        return "", 403
     response = []
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
@@ -337,6 +360,8 @@ def left(now, last_exec, schedule, unit, schedule_unit):
 
 @app.route("/payment_plan/<int:payment_id>")
 def get_payment_plan(payment_id):
+    if not server_password():
+        return "", 403
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         plan = database.get_payment_plan(payment_id)
@@ -364,6 +389,8 @@ def get_payment_plan(payment_id):
 
 @app.route("/payment_plan", methods=["POST"])
 def create_payment_plan():
+    if not server_password():
+        return "", 403
     body = request.json
     try:
 
@@ -391,6 +418,8 @@ def create_payment_plan():
 
 @app.route("/payment_plan/<int:payment_id>", methods=["DELETE"])
 def delete_payment_plan(payment_id):
+    if not server_password():
+        return "", 403
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         payment = database.get_payment_plan(payment_id)
@@ -411,6 +440,8 @@ def delete_payment_plan(payment_id):
 
 @app.route("/log/<int:page>")
 def get_log(page):
+    if not server_password():
+        return "", 403
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
@@ -443,6 +474,8 @@ def get_log(page):
 
 @app.route("/log/item/<int:item_id>")
 def get_log_item(item_id):
+    if not server_password():
+        return "", 403
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
@@ -471,6 +504,8 @@ def get_log_item(item_id):
 
 @app.route("/version/android")
 def version():
+    if not server_password():
+        return "", 403
     file = open("app/android/version", "r")
     app_version = file.read()
     file.close()
@@ -478,9 +513,10 @@ def version():
         "version": int(app_version)
     })
 
-
 @app.route("/apk")
 def apk():
+    if not server_password():
+        return "", 403
     try:
         return send_file("app/android/h-bank.apk")
     except Exception:
@@ -489,6 +525,8 @@ def apk():
 
 @app.route("/info")
 def info():
+    if not server_password():
+        return "", 403
     payment_plans = subprocess.run(["systemctl", "status", "hbank-payment-plans.timer"]).returncode == 0
     backups = subprocess.run(["systemctl", "status", "hbank-backup.timer"]).returncode == 0
     temperature = str(round(CPUTemperature().temperature)) + "°C"
@@ -516,5 +554,18 @@ def get_ram_info():
             return line.split()[1:4]
 
 
+def server_password():
+    try:
+        return request.headers["Password"] == 1234
+    except KeyError:
+        return False
+
+
 if __name__ == "__main__":
+    file = open("password", "r")
+    PASSWORD = file.read()
+    file.close()
+    if PASSWORD is None or len(PASSWORD.strip("\r").strip("\n").strip()) == 0:
+        PASSWORD = "password"
+    print(PASSWORD)
     serve(app, host='0.0.0.0', port=8080)
