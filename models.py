@@ -34,3 +34,5 @@ class Log(db.Entity):
     new_balance_receiver = orm.Required(Decimal)
     time = orm.Required(datetime)
     desc = orm.Optional(str)
+    is_payment_plan = orm.Required(bool)
+    payment_plan_id = orm.Optional(int)

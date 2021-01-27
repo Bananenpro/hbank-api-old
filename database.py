@@ -170,7 +170,7 @@ def transfer_money(sender_name, receiver_name, amount_str, description):
         if sender.balance >= amount:
             sender.balance -= amount
             receiver.balance += amount
-            create_log_entry(sender.name, receiver.name, amount, sender.balance, receiver.balance, datetime.now(), description)
+            create_log_entry(sender.name, receiver.name, amount, sender.balance, receiver.balance, datetime.now(), description, False, -1)
             return True
     except ObjectNotFound:
         return False
@@ -264,7 +264,7 @@ def execute_payment_plan(payment_id):
                 if sender.balance >= pp.amount:
                     sender.balance -= pp.amount
                     receiver.balance += pp.amount
-                    create_log_entry(sender.name, receiver.name, pp.amount, sender.balance, receiver.balance, datetime.now(), pp.desc)
+                    create_log_entry(sender.name, receiver.name, pp.amount, sender.balance, receiver.balance, datetime.now(), pp.desc, True, payment_id)
                     if pp.schedule_unit == "days":
                         pp.last_exec += relativedelta(days=pp.schedule)
                     elif pp.schedule_unit == "weeks":
@@ -301,8 +301,8 @@ def should_execute(now, last_exec, schedule, unit):
 
 # Log
 @db_session
-def create_log_entry(sender_name, receiver_name, amount, new_balance_sender, new_balance_receiver, time, description):
-    Log(sender_name=sender_name, receiver_name=receiver_name, amount=amount, new_balance_sender=new_balance_sender, new_balance_receiver=new_balance_receiver, time=time, desc=description)
+def create_log_entry(sender_name, receiver_name, amount, new_balance_sender, new_balance_receiver, time, description, is_payment_plan, payment_plan_id):
+    Log(sender_name=sender_name, receiver_name=receiver_name, amount=amount, new_balance_sender=new_balance_sender, new_balance_receiver=new_balance_receiver, time=time, desc=description, is_payment_plan=is_payment_plan, payment_plan_id=payment_plan_id)
 
 
 @db_session
@@ -316,7 +316,7 @@ def get_log(username, page):
             return []
     dtos = []
     for entry in log:
-        dtos.append(LogDto(entry.id, entry.sender_name, entry.receiver_name, entry.amount, entry.new_balance_sender, entry.new_balance_receiver, entry.time, entry.desc))
+        dtos.append(LogDto(entry.id, entry.sender_name, entry.receiver_name, entry.amount, entry.new_balance_sender, entry.new_balance_receiver, entry.time, entry.desc, entry.is_payment_plan, entry.payment_plan_id))
     return dtos
 
 
@@ -324,6 +324,6 @@ def get_log(username, page):
 def get_log_item(log_id):
     try:
         item = Log[log_id]
-        return LogDto(item.id, item.sender_name, item.receiver_name, item.amount, item.new_balance_sender, item.new_balance_receiver, item.time, item.desc)
+        return LogDto(item.id, item.sender_name, item.receiver_name, item.amount, item.new_balance_sender, item.new_balance_receiver, item.time, item.desc, item.is_payment_plan, item.payment_plan_id)
     except ObjectNotFound:
         return None

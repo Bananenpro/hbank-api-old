@@ -230,10 +230,10 @@ def transfer_money():
         try:
             Decimal(body["amount"].replace(",", "."))
         except InvalidOperation:
-            return 400
+            return "", 400
 
         if body["amount"].startswith("-"):
-            return 400
+            return "", 400
 
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
@@ -391,10 +391,10 @@ def create_payment_plan():
         try:
             Decimal(body["amount"].replace(",", "."))
         except InvalidOperation:
-            return 400
+            return "", 400
 
         if body["amount"].startswith("-") or body["schedule_unit"].startswith("-"):
-            return 400
+            return "", 400
 
         user = database.get_user_by_auth_token(request.headers["Authorization"])
         if user is None:
@@ -459,7 +459,9 @@ def get_log(page):
                 "new_balance": str(entry.new_balance_receiver) if entry.receiver_name == user.name else str(
                     entry.new_balance_sender),
                 "date": date_str,
-                "description": entry.desc
+                "description": entry.desc,
+                "is_payment_plan": entry.is_payment_plan,
+                "payment_plan_id": entry.payment_plan_id
             })
         return jsonify(response)
     except KeyError:
@@ -490,7 +492,9 @@ def get_log_item(item_id):
             "new_balance": str(log_item.new_balance_receiver) if log_item.receiver_name == user.name else str(
                 log_item.new_balance_sender),
             "date": log_item.time.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y - %H:%M"),
-            "description": log_item.desc
+            "description": log_item.desc,
+            "is_payment_plan": log_item.is_payment_plan,
+            "payment_plan_id": log_item.payment_plan_id
         })
     except KeyError:
         return "", 403

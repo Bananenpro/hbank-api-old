@@ -20,7 +20,7 @@ class PaymentPlanDto:
 
 
 class LogDto:
-    def __init__(self, log_id, sender_name, receiver_name, amount, new_balance_sender, new_balance_receiver, time, desc):
+    def __init__(self, log_id, sender_name, receiver_name, amount, new_balance_sender, new_balance_receiver, time, desc, is_payment_plan, payment_plan_id):
         self.id = log_id
         self.sender_name = sender_name
         self.receiver_name = receiver_name
@@ -29,3 +29,5 @@ class LogDto:
         self.new_balance_receiver = new_balance_receiver
         self.time = time
         self.desc = desc
+        self.is_payment_plan = is_payment_plan
+        self.payment_plan_id = payment_plan_id
