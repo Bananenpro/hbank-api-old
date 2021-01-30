@@ -500,6 +500,23 @@ def get_log_item(item_id):
         return "", 403
 
 
+@app.route("/log-size")
+def get_log_size():
+    if not server_password():
+        return "", 403
+    try:
+        user = database.get_user_by_auth_token(request.headers["Authorization"])
+        if user is None:
+            return "", 403
+        log_size = database.get_log_size(user.name)
+
+        return jsonify({
+            "size": log_size
+        })
+    except KeyError:
+        return "", 403
+
+
 @app.route("/version/android")
 def version():
     if not server_password():
