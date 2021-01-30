@@ -460,7 +460,7 @@ def get_log(page):
                     entry.new_balance_sender),
                 "date": date_str,
                 "description": entry.desc,
-                "is_payment_plan": entry.sender_name == user.name and entry.is_payment_plan,
+                "is_payment_plan": entry.is_payment_plan,
                 "payment_plan_id": entry.payment_plan_id
             })
         return jsonify(response)
@@ -493,7 +493,7 @@ def get_log_item(item_id):
                 log_item.new_balance_sender),
             "date": log_item.time.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y - %H:%M"),
             "description": log_item.desc,
-            "is_payment_plan": log_item.sender_name == user.name and log_item.is_payment_plan,
+            "is_payment_plan": log_item.is_payment_plan,
             "payment_plan_id": log_item.payment_plan_id
         })
     except KeyError:
