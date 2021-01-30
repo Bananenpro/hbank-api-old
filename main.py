@@ -303,7 +303,7 @@ def left_unit(now, last_exec, schedule, schedule_unit):
 
     left_months = delta.months + delta.years * 12
 
-    left_weeks = int(math.ceil((next_date - now_date).days / 7.0))
+    left_weeks = int(math.floor((next_date - now_date).days / 7.0))
 
     if left_years > 0 and schedule_unit == "years":
         return "years"
