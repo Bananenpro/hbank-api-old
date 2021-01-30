@@ -320,6 +320,7 @@ def get_log(username, page):
     return dtos
 
 
+@db_session
 def get_log_size(username):
     return len(select(entry for entry in Log if entry.sender_name == username or entry.receiver_name == username))
 
