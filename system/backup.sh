@@ -4,5 +4,5 @@ mkdir backup
 mkdir backup/uploads
 cp /home/pi/h-bank/database.sqlite backup/
 cp -r /home/pi/h-bank/uploads/profile_pictures backup/uploads/
-tar -czpf "/home/pi/OneDrive/H-Bank/Backups/$current_date.tar.gz" backup
+tar -czpf "/home/pi/OneDrive/Backups/HBank/$current_date.tar.gz" backup
 rm -rf backup
