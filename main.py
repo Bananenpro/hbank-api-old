@@ -1,5 +1,4 @@
 import os
-import subprocess
 import psutil
 
 import pytz
@@ -541,8 +540,8 @@ def apk():
 def info():
     if not server_password():
         return "", 403
-    payment_plans = subprocess.run(["systemctl", "status", "hbank-payment-plans.timer"]).returncode == 0 and os.system("systemctl show hbank-payment-plans.service | grep Result=success") == 0
-    backups = subprocess.run(["systemctl", "status", "hbank-backup.timer"]).returncode == 0 and os.system("systemctl show hbank-backup.service | grep Result=success") == 0
+    payment_plans = os.system("systemctl status hbank-payment-plans.timer") == 0 and os.system("systemctl show hbank-payment-plans.service | grep Result=success") == 0
+    backups = os.system("systemctl status hbank-backup.timer") == 0 and os.system("systemctl show hbank-backup.service | grep Result=success") == 0
     temperature = str(round(CPUTemperature().temperature)) + "°C"
     cpu = str(round(psutil.cpu_percent(interval=0.5))) + "%"
     ram_info = get_ram_info()
