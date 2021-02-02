@@ -541,8 +541,8 @@ def apk():
 def info():
     if not server_password():
         return "", 403
-    payment_plans = subprocess.run(["systemctl", "status", "hbank-payment-plans.timer"]).returncode == 0
-    backups = subprocess.run(["systemctl", "status", "hbank-backup.timer"]).returncode == 0
+    payment_plans = subprocess.run(["systemctl", "status", "hbank-payment-plans.timer"]).returncode == 0 and subprocess.run(["systemctl", "status", "hbank-payment-plans.service"]).returncode == 0
+    backups = subprocess.run(["systemctl", "status", "hbank-backup.timer"]).returncode == 0 and subprocess.run(["systemctl", "status", "hbank-backup.service"]).returncode == 0
     temperature = str(round(CPUTemperature().temperature)) + "°C"
     cpu = str(round(psutil.cpu_percent(interval=0.5))) + "%"
     ram_info = get_ram_info()
