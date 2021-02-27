@@ -629,11 +629,11 @@ def calculate():
 
         if date == "":
             date = None
-        elif deltatime == "":
+        if deltatime == "":
             deltatime = None
-        elif deltaunit == "":
+        if deltaunit == "":
             deltaunit = None
-        elif money == "":
+        if money == "":
             money = None
 
         if ((date is not None and deltatime is not None) or (money is not None and deltatime is not None) or (date is not None and money is not None)) or (deltaunit is None or deltaunit not in "days weeks months years"):
