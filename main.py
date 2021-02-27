@@ -595,7 +595,7 @@ def calculate_from_money(user, money, deltaunit):
             if count >= len(last_exec):
                 last_exec.append(datetime(payment.last_exec.year, payment.last_exec.month, payment.last_exec.day))
             if payment.sender_name == user.name or payment.receiver_name == user.name:
-                if database.should_execute(date, last_exec[count], payment.schedule, payment.schedule_unit):
+                while database.should_execute(date, last_exec[count], payment.schedule, payment.schedule_unit):
                     balance += payment.amount if payment.receiver_name == user.name else -payment.amount
 
                     if payment.schedule_unit == "days":
