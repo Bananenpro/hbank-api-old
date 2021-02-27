@@ -644,7 +644,7 @@ def calculate():
             money_str = None
 
         if ((date_str is not None and deltatime_str is not None) or (money_str is not None and deltatime_str is not None) or (date_str is not None and money_str is not None)) or deltaunit is None:
-            return "", 400
+            return "Too many parameters or no deltaunit!", 400
 
         try:
             if date_str is not None:
@@ -654,9 +654,9 @@ def calculate():
             elif money_str is not None and not money_str.startswith("-"):
                 return jsonify(calculate_from_money(user, Decimal(money_str), deltaunit))
             else:
-                return "", 400
+                return "Too few parameters", 400
         except (ValueError, InvalidOperation):
-            return "", 400
+            return "Invalid parameter(s)!", 400
 
     except KeyError:
         return "", 403
