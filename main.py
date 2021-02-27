@@ -516,6 +516,133 @@ def get_log_size():
         return "", 403
 
 
+def calculate_from_date(user, date, deltaunit):
+    payments = database.get_all_payment_plans()
+    balance = Decimal(str(user.balance))
+
+    for payment in payments:
+        if payment.sender_name == user.name or payment.receiver_name == user.name:
+            last_exec = datetime(payment.last_exec.year, payment.last_exec.month, payment.last_exec.day)
+            while database.should_execute(date, last_exec, payment.schedule, payment.schedule_unit):
+                balance += payment.amount if payment.receiver_name == user.name else -payment.amount
+
+                if payment.schedule_unit == "days":
+                    last_exec += relativedelta(days=payment.schedule)
+                elif payment.schedule_unit == "weeks":
+                    last_exec += relativedelta(weeks=payment.schedule)
+                elif payment.schedule_unit == "months":
+                    last_exec += relativedelta(months=payment.schedule)
+                elif payment.schedule_unit == "years":
+                    last_exec += relativedelta(years=payment.schedule)
+
+    return {
+        "date": date.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y"),
+        "deltatime": get_deltatime(date, deltaunit),
+        "deltaunit": deltaunit,
+        "balance": balance
+    }
+
+
+def calculate_from_deltatime(user, deltatime, deltaunit):
+    if deltaunit == "weeks":
+        return calculate_from_date(user, datetime.now() + relativedelta(weeks=deltatime), deltaunit)
+    elif deltaunit == "months":
+        return calculate_from_date(user, datetime.now() + relativedelta(months=deltatime), deltaunit)
+    elif deltaunit == "years":
+        return calculate_from_date(user, datetime.now() + relativedelta(months=deltatime), deltaunit)
+    else:
+        return calculate_from_date(user, datetime.now() + relativedelta(days=deltatime), "days")
+
+
+def get_deltatime(date, deltaunit):
+    if deltaunit == "years":
+        delta = relativedelta(date, datetime.now())
+        years = delta.years
+        if delta.months > 0 or delta.weeks > 0 or delta.days > 0:
+            years += 1
+        return years
+    elif deltaunit == "months":
+        delta = relativedelta(date, datetime.now())
+        months = delta.months + delta.years * 12
+        if delta.weeks > 0 or delta.days > 0:
+            months += 1
+        return months
+    elif deltaunit == "weeks":
+        return int(math.ceil((date - datetime.now()).days / 7.0))
+    elif deltaunit == "days":
+        return (date - datetime.now()).days
+
+    return -1
+
+
+def calculate_from_money(user, money, deltaunit):
+    payments = database.get_all_payment_plans()
+
+    date = datetime.now() + relativedelta(days=1)
+
+    balance = Decimal(str(user.balance))
+    last_exec = []
+
+    while balance < money:
+        count = 0
+        for payment in payments:
+            if count >= len(last_exec):
+                last_exec.append(datetime(payment.last_exec.year, payment.last_exec.month, payment.last_exec.day))
+            if payment.sender_name == user.name or payment.receiver_name == user.name:
+                if database.should_execute(date, last_exec[count], payment.schedule, payment.schedule_unit):
+                    balance += payment.amount if payment.receiver_name == user.name else -payment.amount
+
+                    if payment.schedule_unit == "days":
+                        last_exec[count] += relativedelta(days=payment.schedule)
+                    elif payment.schedule_unit == "weeks":
+                        last_exec[count] += relativedelta(weeks=payment.schedule)
+                    elif payment.schedule_unit == "months":
+                        last_exec[count] += relativedelta(months=payment.schedule)
+                    elif payment.schedule_unit == "years":
+                        last_exec[count] += relativedelta(years=payment.schedule)
+
+            count += 1
+        date += relativedelta(days=1)
+
+    return {
+        "date": date.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y"),
+        "deltatime": get_deltatime(date, deltaunit),
+        "deltaunit": deltaunit,
+        "balance": balance
+    }
+
+
+@app.route("/calculate")
+def calculate():
+    if not server_password():
+        return "", 403
+
+    try:
+        user = database.get_user_by_auth_token(request.headers["Authorization"])
+        if user is None:
+            return "", 403
+
+        date = request.args.get("date")
+        deltatime = request.args.get("deltatime")
+        deltaunit = request.args.get("deltaunit")
+        money = request.args.get("money")
+
+        if ((date is not None and deltatime is not None) or (money is not None and deltatime is not None) or (date is not None and money is not None)) or (deltaunit is None or deltaunit not in "days weeks months years"):
+            return "", 400
+
+        if date is not None:
+            return jsonify(calculate_from_date(user, date, deltaunit))
+        elif deltatime is not None:
+            return jsonify(calculate_from_deltatime(user, deltatime, deltaunit))
+        elif money is not None:
+            return jsonify(calculate_from_money(user, money, deltaunit))
+        else:
+            return "", 400
+
+    except KeyError:
+        return "", 403
+
+
 @app.route("/version/android")
 def version():
     if not server_password():
