@@ -535,11 +535,15 @@ def calculate_from_date(user, date, deltaunit):
                 elif payment.schedule_unit == "years":
                     last_exec += relativedelta(years=payment.schedule)
 
+    balance_str = str(balance)
+    if balance_str.startswith("-"):
+        balance_str = "0"
+
     return {
         "date": date.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y"),
         "deltatime": get_deltatime(date, deltaunit),
         "deltaunit": deltaunit,
-        "balance": balance
+        "balance": balance_str
     }
 
 
@@ -604,11 +608,14 @@ def calculate_from_money(user, money, deltaunit):
             count += 1
         date += relativedelta(days=1)
 
+    balance_str = str(balance)
+    if balance_str.startswith("-"):
+        balance_str = "0"
     return {
         "date": date.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y"),
         "deltatime": get_deltatime(date, deltaunit),
         "deltaunit": deltaunit,
-        "balance": balance
+        "balance": balance_str
     }
 
 
