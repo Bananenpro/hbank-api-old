@@ -638,7 +638,7 @@ def calculate():
             date_str = None
         if deltatime_str == "":
             deltatime_str = None
-        if deltaunit == "" or deltaunit != "days" or deltaunit != "weeks" or deltaunit != "months" or deltaunit != "years":
+        if deltaunit == "" or (deltaunit != "days" and deltaunit != "weeks" and deltaunit != "months" and deltaunit != "years"):
             deltaunit = None
         if money_str == "":
             money_str = None
