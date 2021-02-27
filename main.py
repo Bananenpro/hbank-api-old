@@ -630,7 +630,7 @@ def calculate():
             return "", 403
 
         date_str = request.args.get("date").strip()
-        deltatime_str = int(request.args.get("deltatime").strip())
+        deltatime_str = request.args.get("deltatime").strip()
         deltaunit = request.args.get("deltaunit").strip()
         money_str = request.args.get("money").strip()
 
