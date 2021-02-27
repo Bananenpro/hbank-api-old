@@ -584,7 +584,7 @@ def get_deltatime(date, deltaunit):
 def calculate_from_money(user, money, deltaunit):
     payments = database.get_all_payment_plans()
 
-    date = datetime.now() + relativedelta(days=1)
+    date = datetime.now()
 
     balance = Decimal(str(user.balance))
     last_exec = []
