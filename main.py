@@ -622,10 +622,19 @@ def calculate():
         if user is None:
             return "", 403
 
-        date = request.args.get("date")
-        deltatime = request.args.get("deltatime")
-        deltaunit = request.args.get("deltaunit")
-        money = request.args.get("money")
+        date = request.args.get("date").strip()
+        deltatime = request.args.get("deltatime").strip()
+        deltaunit = request.args.get("deltaunit").strip()
+        money = request.args.get("money").strip()
+
+        if date == "":
+            date = None
+        elif deltatime == "":
+            deltatime = None
+        elif deltaunit == "":
+            deltaunit = None
+        elif money == "":
+            money = None
 
         if ((date is not None and deltatime is not None) or (money is not None and deltatime is not None) or (date is not None and money is not None)) or (deltaunit is None or deltaunit not in "days weeks months years"):
             return "", 400
