@@ -582,44 +582,16 @@ def get_deltatime(date, deltaunit):
 
 
 def calculate_from_money(user, money, deltaunit):
-    payments = database.get_all_payment_plans()
-
     now = datetime.now()
     date = datetime(now.year, now.month, now.day)
 
-    balance = Decimal(str(user.balance))
-    last_exec = []
+    result = calculate_from_date(user, date, deltaunit)
 
-    while balance < money:
-        count = 0
-        for payment in payments:
-            if count >= len(last_exec):
-                last_exec.append(datetime(payment.last_exec.year, payment.last_exec.month, payment.last_exec.day))
-            if payment.sender_name == user.name or payment.receiver_name == user.name:
-                while database.should_execute(date, last_exec[count], payment.schedule, payment.schedule_unit):
-                    balance += payment.amount if payment.receiver_name == user.name else -payment.amount
-
-                    if payment.schedule_unit == "days":
-                        last_exec[count] += relativedelta(days=payment.schedule)
-                    elif payment.schedule_unit == "weeks":
-                        last_exec[count] += relativedelta(weeks=payment.schedule)
-                    elif payment.schedule_unit == "months":
-                        last_exec[count] += relativedelta(months=payment.schedule)
-                    elif payment.schedule_unit == "years":
-                        last_exec[count] += relativedelta(years=payment.schedule)
-
-            count += 1
+    while Decimal(result["balance"]) < money:
         date += relativedelta(days=1)
+        result = calculate_from_date(user, date, deltaunit)
 
-    balance_str = str(balance)
-    if balance_str.startswith("-"):
-        balance_str = "0"
-    return {
-        "date": date.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y"),
-        "deltatime": get_deltatime(date, deltaunit),
-        "deltaunit": deltaunit,
-        "balance": balance_str
-    }
+    return result
 
 
 @app.route("/calculate")
