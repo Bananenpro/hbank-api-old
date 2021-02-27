@@ -629,24 +629,30 @@ def calculate():
         if user is None:
             return "", 403
 
+        date_str = request.args.get("date").strip()
+        deltatime_str = int(request.args.get("deltatime").strip())
+        deltaunit = request.args.get("deltaunit").strip()
+        money_str = request.args.get("money").strip()
+
+        if date_str == "":
+            date_str = None
+        if deltatime_str == "":
+            deltatime_str = None
+        if deltaunit == "" or deltaunit != "days" or deltaunit != "weeks" or deltaunit != "months" or deltaunit != "years":
+            deltaunit = None
+        if money_str == "":
+            money_str = None
+
+        if ((date_str is not None and deltatime_str is not None) or (money_str is not None and deltatime_str is not None) or (date_str is not None and money_str is not None)) or deltaunit is None:
+            return "", 400
+
         try:
-            date = datetime.strptime(request.args.get("date").strip(), "%d.%m.%Y")
-            deltatime = int(request.args.get("deltatime").strip())
-            deltaunit = request.args.get("deltaunit").strip()
-            money = request.args.get("money").strip()
-
-            if deltaunit == "" or deltaunit != "days" or deltaunit != "weeks" or deltaunit != "months" or deltaunit != "years":
-                deltaunit = None
-
-            if ((date is not None and deltatime is not None) or (money is not None and deltatime is not None) or (date is not None and money is not None)) or deltaunit is None:
-                return "", 400
-
-            if date is not None:
-                return jsonify(calculate_from_date(user, date, deltaunit))
-            elif deltatime is not None:
-                return jsonify(calculate_from_deltatime(user, deltatime, deltaunit))
-            elif money is not None and not money.startswith("-"):
-                return jsonify(calculate_from_money(user, money, deltaunit))
+            if date_str is not None:
+                return jsonify(calculate_from_date(user, datetime.strptime(date_str, "%d.%m.%Y"), deltaunit))
+            elif deltatime_str is not None:
+                return jsonify(calculate_from_deltatime(user, int(deltatime_str), deltaunit))
+            elif money_str is not None and not money_str.startswith("-"):
+                return jsonify(calculate_from_money(user, Decimal(money_str), deltaunit))
             else:
                 return "", 400
         except (ValueError, InvalidOperation):
