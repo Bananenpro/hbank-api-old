@@ -559,22 +559,24 @@ def calculate_from_deltatime(user, deltatime, deltaunit):
 
 
 def get_deltatime(date, deltaunit):
+    now = datetime.now()
+    now_date = datetime(now.year, now.month, now.day)
     if deltaunit == "years":
-        delta = relativedelta(date, datetime.now())
+        delta = relativedelta(date, now_date)
         years = delta.years
         if delta.months > 0 or delta.weeks > 0 or delta.days > 0:
             years += 1
         return years
     elif deltaunit == "months":
-        delta = relativedelta(date, datetime.now())
+        delta = relativedelta(date, now_date)
         months = delta.months + delta.years * 12
         if delta.weeks > 0 or delta.days > 0:
             months += 1
         return months
     elif deltaunit == "weeks":
-        return int(math.ceil((date - datetime.now()).days / 7.0))
+        return int(math.ceil((date - now_date).days / 7.0))
     elif deltaunit == "days":
-        return (date - datetime.now()).days
+        return (date - now_date).days
 
     return -1
 
