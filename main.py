@@ -634,8 +634,8 @@ def calculate():
             return jsonify(calculate_from_date(user, date, deltaunit))
         elif deltatime is not None:
             return jsonify(calculate_from_deltatime(user, deltatime, deltaunit))
-        elif money is not None:
-            return jsonify(calculate_from_money(user, money, deltaunit))
+        elif money is not None and not money.startswith("-"):
+            return jsonify(calculate_from_money(user, Decimal(money), deltaunit))
         else:
             return "", 400
 
