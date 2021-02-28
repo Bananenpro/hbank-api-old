@@ -583,11 +583,12 @@ def get_deltatime(date, deltaunit):
 
 def calculate_from_money(user, money, deltaunit):
     now = datetime.now()
-    date = datetime(now.year, now.month, now.day)
+    now_date = datetime(now.year, now.month, now.day)
+    date = datetime(now_date.year, now_date.month, now_date.day)
 
     result = calculate_from_date(user, date, deltaunit)
 
-    while Decimal(result["balance"]) < money:
+    while Decimal(result["balance"]) < money and relativedelta(date, now_date).years < 5:
         date += relativedelta(days=1)
         result = calculate_from_date(user, date, deltaunit)
 
@@ -623,9 +624,27 @@ def calculate():
 
         try:
             if date_str is not None:
-                return jsonify(calculate_from_date(user, datetime.strptime(date_str, "%d.%m.%Y"), deltaunit))
+                date = datetime.strptime(date_str, "%d.%m.%Y")
+                if relativedelta(date, datetime.now()).years >= 5:
+                    return "Too long", 400
+                return jsonify(calculate_from_date(user, date, deltaunit))
             elif deltatime_str is not None:
-                return jsonify(calculate_from_deltatime(user, int(deltatime_str), deltaunit))
+                deltatime = int(deltatime_str)
+
+                if deltaunit == "weeks":
+                    if deltatime >= 52 * 5:
+                        return "Too long", 400
+                elif deltaunit == "months":
+                    if deltatime >= 12 * 5:
+                        return "Too long", 400
+                elif deltaunit == "years":
+                    if deltatime >= 5:
+                        return "Too long", 400
+                else:
+                    if deltatime >= 356 * 5 + 1:
+                        return "Too long", 400
+
+                return jsonify(calculate_from_deltatime(user, deltatime, deltaunit))
             elif money_str is not None and not money_str.startswith("-"):
                 return jsonify(calculate_from_money(user, Decimal(money_str), deltaunit))
             else:
