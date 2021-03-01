@@ -541,7 +541,7 @@ def calculate_from_date(user, date, deltaunit):
 
     return {
         "date": date.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y"),
-        "deltatime": get_deltatime(date, deltaunit),
+        "deltatime": str(get_deltatime(date, deltaunit)),
         "deltaunit": deltaunit,
         "balance": balance_str
     }
