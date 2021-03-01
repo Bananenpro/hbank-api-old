@@ -588,7 +588,7 @@ def calculate_from_money(user, money, deltaunit):
 
     result = calculate_from_date(user, date, deltaunit)
 
-    while Decimal(result["balance"]) < money and relativedelta(date, now_date).years < 5:
+    while Decimal(result["balance"]) < money and relativedelta(date, now_date).years < 5 + 1:
         date += relativedelta(days=1)
         result = calculate_from_date(user, date, deltaunit)
 
@@ -625,7 +625,7 @@ def calculate():
         try:
             if date_str is not None:
                 date = datetime.strptime(date_str, "%d.%m.%Y")
-                if relativedelta(date, datetime.now()).years >= 5:
+                if relativedelta(date, datetime.now()).years >= 5 + 1:
                     return "Too long", 400
                 if date < datetime.now():
                     return "Invalid date", 400
@@ -637,13 +637,13 @@ def calculate():
                     return "Invalid deltatime", 400
 
                 if deltaunit == "weeks":
-                    if deltatime >= 52 * 5:
+                    if deltatime >= 52 * 5 + 1:
                         return "Too long", 400
                 elif deltaunit == "months":
-                    if deltatime >= 12 * 5:
+                    if deltatime >= 12 * 5 + 1:
                         return "Too long", 400
                 elif deltaunit == "years":
-                    if deltatime >= 5:
+                    if deltatime >= 5 + 1:
                         return "Too long", 400
                 else:
                     if deltatime >= 356 * 5 + 1:
