@@ -589,7 +589,14 @@ def calculate_from_money(user, money, deltaunit):
     result = calculate_from_date(user, date, deltaunit)
 
     while Decimal(result["balance"]) < money and relativedelta(date, now_date).years < 5:
-        date += relativedelta(days=1)
+        if deltaunit == "years":
+            date += relativedelta(years=1)
+        elif deltaunit == "months":
+            date += relativedelta(months=1)
+        elif deltaunit == "weeks":
+            date += relativedelta(weeks=1)
+        else:
+            date += relativedelta(days=1)
         result = calculate_from_date(user, date, deltaunit)
 
     return result
