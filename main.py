@@ -627,9 +627,14 @@ def calculate():
                 date = datetime.strptime(date_str, "%d.%m.%Y")
                 if relativedelta(date, datetime.now()).years >= 5:
                     return "Too long", 400
+                if date < datetime.now():
+                    return "Invalid date", 400
                 return jsonify(calculate_from_date(user, date, deltaunit))
             elif deltatime_str is not None:
                 deltatime = int(deltatime_str)
+
+                if deltatime < 1:
+                    return "Invalid deltatime", 400
 
                 if deltaunit == "weeks":
                     if deltatime >= 52 * 5:
