@@ -553,7 +553,7 @@ def calculate_from_deltatime(user, deltatime, deltaunit):
     elif deltaunit == "months":
         return calculate_from_date(user, datetime.now() + relativedelta(months=deltatime), deltaunit)
     elif deltaunit == "years":
-        return calculate_from_date(user, datetime.now() + relativedelta(months=deltatime), deltaunit)
+        return calculate_from_date(user, datetime.now() + relativedelta(years=deltatime), deltaunit)
     else:
         return calculate_from_date(user, datetime.now() + relativedelta(days=deltatime), "days")
 
