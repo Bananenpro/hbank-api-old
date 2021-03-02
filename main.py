@@ -748,7 +748,7 @@ if __name__ == "__main__":
         PASSWORD = "password"
 
     file2 = open("parent_password", "r")
-    PARENT_PASSWORD = file.read()
+    PARENT_PASSWORD = file2.read()
     file2.close()
     if PARENT_PASSWORD is None or len(PARENT_PASSWORD.strip("\r").strip("\n").strip()) == 0:
         PARENT_PASSWORD = "parent"
