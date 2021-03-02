@@ -689,7 +689,7 @@ def version():
 @app.route("/apk")
 def apk():
     try:
-        return send_file("app/android/h-bank.apk")
+        return send_file("app/android/h-bank.apk", as_attachment=True)
     except Exception:
         return "", 500
 
