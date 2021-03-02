@@ -21,7 +21,8 @@ app = Flask(__name__)
 
 profile_picture_directory = 'uploads/profile_pictures/'
 TIMEZONE = "Europe/Berlin"
-PASSWORD = ""
+PASSWORD = "password"
+PARENT_PASSWORD = "parent"
 
 
 @app.route("/user")
@@ -76,27 +77,32 @@ def register():
         name_length = False
         password_length = False
         already_exists = False
+        wrong_parent_password = False
         if len(body["name"]) > 1:
             name_length = True
         if len(body["password"]) >= 6:
             password_length = True
         if database.get_user(body["name"]) is not None:
             already_exists = True
+        if body["is_parent"] and body["parent_password"] != PARENT_PASSWORD:
+            wrong_parent_password = True
 
-        if password_length and name_length and not already_exists:
+        if password_length and name_length and not already_exists and not wrong_parent_password:
             database.create_user(body["name"], body["password"], body["is_parent"])
             return jsonify({
                 "name_length": name_length,
                 "password_length": password_length,
                 "required_password_length": 6,
-                "already_exists": already_exists
+                "already_exists": already_exists,
+                "wrong_parent_password": wrong_parent_password
             }), 201
         else:
             return jsonify({
                 "name_length": name_length,
                 "password_length": password_length,
                 "required_password_length": 6,
-                "already_exists": already_exists
+                "already_exists": already_exists,
+                "wrong_parent_password": wrong_parent_password
             }), 500
     except KeyError:
         return "", 400
@@ -740,4 +746,11 @@ if __name__ == "__main__":
     file.close()
     if PASSWORD is None or len(PASSWORD.strip("\r").strip("\n").strip()) == 0:
         PASSWORD = "password"
+
+    file2 = open("parent_password", "r")
+    PARENT_PASSWORD = file.read()
+    file2.close()
+    if PARENT_PASSWORD is None or len(PARENT_PASSWORD.strip("\r").strip("\n").strip()) == 0:
+        PARENT_PASSWORD = "parent"
+
     serve(app, host='0.0.0.0', port=5000, url_scheme='https')

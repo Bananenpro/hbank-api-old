@@ -6,3 +6,4 @@ database.sqlite
 /app
 /__pycache__
 password
+parent_password

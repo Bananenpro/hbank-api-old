@@ -9,7 +9,8 @@ mkdir app
 mkdir app/android
 echo "10" > app/android/version
 echo "password" > password
-echo "Please change the default password in '~/h-bank/password'"
+echo "parent" > parent_password
+echo "Please change the default password in '~/h-bank/password' and the default parent password in '~/h-bank/parent_password'"
 echo Installing dependencies...
 pip3 install Flask pony Pillow pytz waitress gpiozero psutil python-dateutil
 echo Setting up system services...
