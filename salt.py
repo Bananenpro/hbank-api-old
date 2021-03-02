@@ -1,0 +1,1 @@
+SALT = b'\xe2\xaf\xbc:\xdd'

@@ -15,14 +15,15 @@ from waitress import serve
 import database
 import uuid
 from PIL import Image
+from salt import SALT
 
 
 app = Flask(__name__)
 
 profile_picture_directory = 'uploads/profile_pictures/'
 TIMEZONE = "Europe/Berlin"
-PASSWORD = "password"
-PARENT_PASSWORD = "parent"
+PASSWORD = ""
+PARENT_PASSWORD = ""
 
 
 @app.route("/user")
@@ -735,22 +736,24 @@ def get_ram_info():
 
 def server_password():
     try:
-        return request.headers["Password"].strip() == PASSWORD.strip("\r").strip("\n").strip()
+        password = request.headers["Password"].strip()
+        key = database.generate_hash(password.encode("utf-8"), SALT)
+        return key == PASSWORD
     except KeyError:
         return False
 
 
 if __name__ == "__main__":
-    file = open("password", "r")
+    file = open("password", "rb")
     PASSWORD = file.read()
     file.close()
-    if PASSWORD is None or len(PASSWORD.strip("\r").strip("\n").strip()) == 0:
-        PASSWORD = "password"
+    if PASSWORD is None or len(PASSWORD.strip().strip(b"\r").strip(b"\n")) == 0:
+        PASSWORD = b'\xf2\x15\xcd\xb3\xfd\x19(\xa9\x81\xd6\xad\x9dl,<\xce\x02jUX\xe0\x0e\xefc\xf1\x97\x11t\xc6\x14O\xa7'
 
-    file2 = open("parent_password", "r")
+    file2 = open("parent_password", "rb")
     PARENT_PASSWORD = file2.read()
     file2.close()
-    if PARENT_PASSWORD is None or len(PARENT_PASSWORD.strip("\r").strip("\n").strip()) == 0:
-        PARENT_PASSWORD = "parent"
+    if PARENT_PASSWORD is None or len(PARENT_PASSWORD.strip().strip(b"\r").strip(b"\n")) == 0:
+        PARENT_PASSWORD = b"\xf0\x9c\xd9\xabF\xc8\x1aj\xfa\xff\x9e\x1d\x7fq\x19Y\xf1\x14\xb5\x9c\xaa\x9c\xd5\x8co\x8c\xa4\xbbS:'\\"
 
     serve(app, host='0.0.0.0', port=5000, url_scheme='https')
