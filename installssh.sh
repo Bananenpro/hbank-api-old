@@ -9,9 +9,9 @@ mkdir app
 mkdir app/android
 echo "10" > app/android/version
 touch password
-echo "Please change the default password with '~/h-bank/change_password.py [new_password]/"
+echo "Please change the default password with 'python ~/h-bank/change_password.py [new_password]/"
 touch parent_password
-echo "Please change the default parent password with '~/h-bank/change_parent_password.py [new_password]/"
+echo "Please change the default parent password with 'python ~/h-bank/change_parent_password.py [new_password]/"
 echo Installing dependencies...
 pip3 install Flask pony Pillow pytz waitress gpiozero psutil python-dateutil
 echo Setting up system services...
