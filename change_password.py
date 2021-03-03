@@ -10,3 +10,4 @@ if __name__ == '__main__':
         file = open("password", "wb")
         file.write(hashlib.pbkdf2_hmac("sha256", args[1].encode("utf-8"), SALT, 10000))
         file.close()
+        print("Password changed! Please restart hbank for changes to take affect!")
