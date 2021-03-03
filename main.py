@@ -79,9 +79,9 @@ def register():
         password_length = False
         already_exists = False
         wrong_parent_password = False
-        if len(body["name"]) > 1:
+        if 1 < len(body["name"]) <= 15:
             name_length = True
-        if len(body["password"]) >= 6:
+        if 6 <= len(body["password"]) >= 15:
             password_length = True
         if database.get_user(body["name"]) is not None:
             already_exists = True
@@ -246,6 +246,8 @@ def transfer_money():
             return "", 403
 
         try:
+            if len(body["description"]) > 25:
+                return "", 400
             if database.transfer_money(user.name, body["receiver"], body["amount"], body["description"]):
                 return "", 200
             else:
@@ -406,6 +408,8 @@ def create_payment_plan():
         if user is None:
             return "", 403
         try:
+            if len(body["description"]) > 25:
+                return "", 400
             if database.create_payment_plan(user.name, body["receiver"], body["amount"], body["schedule"], body["schedule_unit"], body["description"]):
                 return "", 201
             else:
