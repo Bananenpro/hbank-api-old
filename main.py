@@ -81,7 +81,7 @@ def register():
         wrong_parent_password = False
         if 1 < len(body["name"]) <= 15:
             name_length = True
-        if 6 <= len(body["password"]) >= 15:
+        if 6 <= len(body["password"]) <= 15:
             password_length = True
         if database.get_user(body["name"]) is not None:
             already_exists = True
