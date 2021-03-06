@@ -181,7 +181,7 @@ def update_cash():
         if user is None:
             return "", 403
         try:
-            database.update_cash(user.name, Decimal(request.json["cash"]))
+            database.update_cash(user.name, round(Decimal(request.json["cash"].replace(",", ".")), 2))
         except (KeyError, InvalidOperation):
             return "", 400
     except KeyError:
