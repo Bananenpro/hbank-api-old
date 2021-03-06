@@ -137,8 +137,9 @@ def change_profile_picture_path(username, new_profile_picture_path):
 def update_cash(username, new_cash):
     try:
         user = User[username]
-        user.cash = new_cash
-        user.last_cash_edit = datetime.now()
+        if user.cash != new_cash:
+            user.cash = new_cash
+            user.last_cash_edit = datetime.now()
     except ObjectNotFound:
         return
 
