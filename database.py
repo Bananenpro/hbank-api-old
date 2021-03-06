@@ -138,6 +138,7 @@ def update_cash(username, new_cash):
     try:
         user = User[username]
         user.cash = new_cash
+        user.last_cash_edit = datetime.now()
     except ObjectNotFound:
         return
 
