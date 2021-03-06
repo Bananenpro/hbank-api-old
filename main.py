@@ -60,6 +60,7 @@ def get_user(name):
         return jsonify({
             "name": user.name,
             "balance": str(user.balance),
+            "cash": str(user.cash),
             "is_parent": user.is_parent
         })
     else:
@@ -144,6 +145,8 @@ def logout():
 
 @app.route("/profile_picture", methods=["POST"])
 def change_profile_picture():
+    if not server_password():
+        return "", 403
     try:
         user = database.get_user_by_auth_token(request.headers["Authorization"])
 
@@ -168,6 +171,22 @@ def change_profile_picture():
         return "", 403
 
 
+@app.route("/cash", methods=["PUT"])
+def update_cash():
+    if not server_password():
+        return "", 403
+    try:
+        user = database.get_user_by_auth_token(request.headers["Authorization"])
+        if user is None:
+            return "", 403
+        try:
+            database.update_cash(user.name, Decimal(request.json["cash"]))
+        except (KeyError, InvalidOperation):
+            return "", 400
+    except KeyError:
+        return "", 403
+
+
 def resize(filepath, target_size):
     if os.path.isfile(filepath):
         image = Image.open(filepath)
@@ -185,6 +204,8 @@ def resize(filepath, target_size):
 
 @app.route("/profile_picture/<string:name>")
 def get_profile_picture(name):
+    if not server_password():
+        return "", 403
     try:
         user = database.get_user(name)
 
@@ -203,6 +224,8 @@ def get_profile_picture(name):
 
 @app.route("/profile_picture_id/<string:name>")
 def get_profile_picture_id(name):
+    if not server_password():
+        return "", 403
     user = database.get_user(name)
 
     if user is None:
