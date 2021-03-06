@@ -10,6 +10,7 @@ class User(db.Entity):
     password_hash = orm.Required(bytes)
     balance = orm.Required(Decimal)
     cash = orm.Required(Decimal)
+    last_cash_edit = orm.Required(datetime)
     profile_picture = orm.Optional(str)
     profile_picture_id = orm.Required(int)
     is_parent = orm.Required(bool)

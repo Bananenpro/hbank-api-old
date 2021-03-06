@@ -61,6 +61,7 @@ def get_user(name):
             "name": user.name,
             "balance": str(user.balance),
             "cash": str(user.cash),
+            "last_cash_edit": user.last_cash_edit.astimezone(pytz.timezone(TIMEZONE)).strftime("%d.%m.%Y - %H:%M"),
             "is_parent": user.is_parent
         })
     else:

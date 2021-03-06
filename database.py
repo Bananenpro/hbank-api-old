@@ -24,7 +24,7 @@ def create_user(name, password, is_parent):
     key = generate_hash(password.encode("utf-8"), salt)
 
     password_hash = salt + key
-    User(name=name, password_hash=password_hash, profile_picture_id=0, is_parent=is_parent, balance=5000 if is_parent else 0, cash=0)
+    User(name=name, password_hash=password_hash, profile_picture_id=0, is_parent=is_parent, balance=5000 if is_parent else 0, cash=0, last_cash_edit=datetime.now())
 
 
 @db_session
@@ -93,7 +93,7 @@ def get_user_by_auth_token(token):
         user.auth_token = ""
         user.token_expiration_date = None
         return None
-    return UserDto(user.name, user.profile_picture, user.profile_picture_id, user.balance, user.cash, user.is_parent)
+    return UserDto(user.name, user.profile_picture, user.profile_picture_id, user.balance, user.cash, user.last_cash_edit, user.is_parent)
 
 
 def generate_hash(password, salt):
@@ -105,7 +105,7 @@ def get_users():
     users = select(u for u in User)
     dtos = []
     for u in users:
-        dtos.append(UserDto(u.name, u.profile_picture, u.profile_picture_id, u.balance, u.cash, u.is_parent))
+        dtos.append(UserDto(u.name, u.profile_picture, u.profile_picture_id, u.balance, u.cash, u.last_cash_edit, u.is_parent))
     return dtos
 
 
@@ -113,7 +113,7 @@ def get_users():
 def get_user(name):
     try:
         u = User[name]
-        return UserDto(u.name, u.profile_picture, u.profile_picture_id, u.balance, u.cash, u.is_parent)
+        return UserDto(u.name, u.profile_picture, u.profile_picture_id, u.balance, u.cash, u.last_cash_edit, u.is_parent)
     except ObjectNotFound:
         return None
 

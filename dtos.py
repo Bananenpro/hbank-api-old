@@ -1,10 +1,11 @@
 class UserDto:
-    def __init__(self, name, profile_picture, profile_picture_id, balance, cash, is_parent):
+    def __init__(self, name, profile_picture, profile_picture_id, balance, cash, last_cash_edit, is_parent):
         self.name = name
         self.profile_picture = profile_picture
         self.profile_picture_id = profile_picture_id
         self.balance = balance
         self.cash = cash
+        self.last_cash_edit = last_cash_edit
         self.is_parent = is_parent
 
 
