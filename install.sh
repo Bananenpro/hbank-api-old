@@ -60,7 +60,7 @@ mkdir backup
 mkdir backup/uploads
 cp $HOME/h-bank/database.sqlite backup/
 cp -r $HOME/h-bank/uploads/profile_pictures backup/uploads/
-tar -czpf '$HOME/OneDrive/Backups/HBank/\$current_date.tar.gz' backup
+tar -czpf \"$HOME/OneDrive/Backups/HBank/\$current_date.tar.gz\" backup
 rm -rf backup" > system/backup.sh
 
 echo "[Unit]
