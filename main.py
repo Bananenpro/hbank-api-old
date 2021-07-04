@@ -181,6 +181,7 @@ def update_cash():
             return "", 403
         try:
             database.update_cash(user.name, round(Decimal(request.json["cash"].replace(",", ".")), 2))
+            return "", 200
         except (KeyError, InvalidOperation):
             return "", 400
     except KeyError:
