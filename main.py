@@ -15,7 +15,7 @@ from flask import Flask, jsonify, request, send_file
 from waitress import serve
 import database
 import uuid
-from PIL import Image
+from PIL import Image, ImageOps, ImageDraw
 from salt import SALT
 
 
@@ -160,15 +160,50 @@ def change_profile_picture():
             if extension != ".jpg" and extension != ".jpeg" and extension != ".png":
                 return "", 400
 
-            path = os.path.join(profile_picture_directory, str(uuid.uuid4()) + ".jpg")
+            path = os.path.join(profile_picture_directory, str(uuid.uuid4()) + ".png")
             image.save(path)
-            resize(path, 500.0)
+            process_profile_picture(path)
             database.change_profile_picture_path(user.name, path)
             return "", 200
         else:
             return "", 400
     except KeyError:
         return "", 403
+
+
+def process_profile_picture(filepath):
+    im = Image.open(filepath)
+    width, height = im.size
+
+    # crop
+
+    if (width > height):
+        im = im.crop(((width - height) / 2, 0, width - (width - height) / 2, height))
+
+    if (height > width):
+        im = im.crop((0, (height - width) / 2, width, height - (height - width) / 2))
+
+    width, height = im.size
+
+    # resize
+
+    factor = width / 500.0
+
+    new_dim = (int(width/factor), int(height/factor))
+    im = im.resize(new_dim)
+
+    # round
+
+    bigsize = (im.size[0] * 3, im.size[1] * 3)
+    mask = Image.new('L', bigsize, 0)
+    draw = ImageDraw.Draw(mask) 
+    draw.ellipse((0, 0) + bigsize, fill=255)
+    mask = mask.resize(im.size, Image.ANTIALIAS)
+    im.putalpha(mask)
+
+    output = ImageOps.fit(im, mask.size, centering=(0.5, 0.5))
+    output.putalpha(mask)
+    output.save(filepath)
 
 
 @app.route("/cash", methods=["PUT"])
@@ -188,19 +223,37 @@ def update_cash():
         return "", 403
 
 
-def resize(filepath, target_size):
-    if os.path.isfile(filepath):
-        image = Image.open(filepath)
-        width, height = image.size
+def process_profile_picture(filepath):
+    im = Image.open(filepath)
+    width, height = im.size
 
-        if width > height:
-            factor = height / target_size
-        else:
-            factor = width / target_size
+    # crop
 
-        new_dim = (int(width/factor), int(height/factor))
-        new_image = image.resize(new_dim)
-        new_image.save(filepath, "JPEG", dpi=[300, 300], quality=80)
+    if (width > height):
+        im = im.crop(((width - height) / 2, 0, width - (width - height) / 2, height))
+
+    if (height > width):
+        im = im.crop((0, (height - width) / 2, width, height - (height - width) / 2))
+
+    # resize
+
+    factor = width / target_size
+
+    new_dim = (int(width/factor), int(height/factor))
+    im = im.resize(new_dim)
+
+    # round
+
+    bigsize = (im.size[0] * 3, im.size[1] * 3)
+    mask = Image.new('L', bigsize, 0)
+    draw = ImageDraw.Draw(mask) 
+    draw.ellipse((0, 0) + bigsize, fill=255)
+    mask = mask.resize(im.size, Image.ANTIALIAS)
+    im.putalpha(mask)
+
+    output = ImageOps.fit(im, mask.size, centering=(0.5, 0.5))
+    output.putalpha(mask)
+    output.save(filepath)
 
 
 @app.route("/profile_picture/<string:name>")
